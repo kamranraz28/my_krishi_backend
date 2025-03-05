@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Message;
 use App\Models\Project;
+use App\Models\Projectagent;
 use App\Models\Projectdetail;
+use App\Models\User;
 use Auth;
 use Illuminate\Http\Request;
 
@@ -147,6 +149,50 @@ class ProjectController extends Controller
             'status' => 'success',
             'message' => 'message sent!'
         ], 200);
+    }
+
+    public function agentMapping()
+    {
+        $user = Auth::user();
+
+        if ($user->level !== 100) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'You are not eligible to do this.'
+            ], 401);
+        }
+        $projects = Project::with('details')->get();
+        $agents = User::where('level', 300)->get();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Mapping page showing successfully.',
+            'projects' => $projects,
+            'agents' => $agents
+        ], 200);
+    }
+
+    public function agentMappingConfirm(Request $request)
+    {
+        $user = Auth::user();
+
+        if ($user->level !== 100) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'You are not eligible to do this.'
+            ], 401);
+        }
+
+        Projectagent::create([
+            'project_id' => $request->project_id,
+            'agent_id' => $request->agent_id
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Project-Agent mapping successfull.'
+        ], 200);
+
     }
 
 

@@ -23,4 +23,19 @@ class Project extends Model
     {
         return $this->hasOne(Projectdetail::class, 'project_id');
     }
+
+    public function booking()
+    {
+        return $this->hasMany(Booking::class, 'project_id');
+    }
+    public function projectupdate()
+    {
+        return $this->hasMany(Projectupdate::class, 'project_id');
+    }
+
+    public function agent()
+    {
+        return $this->hasMany(Projectagent::class, 'project_id');
+    }
+
 }
