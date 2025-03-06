@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Comment;
 use App\Models\Projectagent;
 use App\Models\Projectupdate;
+use App\Models\Reply;
 use Auth;
 use Illuminate\Http\Request;
 
@@ -84,6 +86,65 @@ class AgentController extends Controller
             'message' => 'Project update stored successfully.',
             'uploaded_images' => $fileNames
         ]);
+    }
+
+    public function projectUpdate($id)
+    {
+        // Fetch project updates for the given project ID
+        $projectUpdates = Projectupdate::with('comment.reply')->where('project_id', $id)->get();
+
+        // Transform the project updates to format images correctly
+        $projectUpdates->transform(function ($update) {
+            // Decode JSON images
+            $images = json_decode($update->image, true) ?? [];
+
+            // Generate full URLs for images
+            $update->image_urls = array_map(fn($path) => url($path), $images);
+
+            return $update;
+        });
+
+        // Return the response with the updated project updates
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Showing all updates',
+            'updates' => $projectUpdates
+        ], 200);
+    }
+
+    public function comment(Request $request, $id)
+    {
+        $user = Auth::user();
+
+        $comment = Comment::create([
+            'projectupdate_id' => $id,
+            'comment_by' => $user->id,
+            'comment' => $request->comment
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Comment successfull',
+            'bookings' => $comment
+        ],200);
+
+    }
+
+    public function reply(Request $request, $id)
+    {
+        $user = Auth::user();
+
+        $reply= Reply::create([
+            'comment_id' => $id,
+            'replied_by' => $user->id,
+            'reply' => $request->reply
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Reply successfull',
+            'reply' => $reply
+        ],200);
     }
 
 

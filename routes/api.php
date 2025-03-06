@@ -38,11 +38,21 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/projects/booking/confirm/{id?}', [InvestorController::class, 'confirmBooking']);
         Route::get('/projects/my-bookings', [InvestorController::class, 'myBookings']);
         Route::get('/projects/update/{id?}', [InvestorController::class, 'projectUpdate']);
+        //comment by Projectupdate id
+        Route::post('/projects/comment/{id?}', [InvestorController::class, 'comment']);
+        //reply by Comment id
+        Route::post('/projects/reply/{id?}', [InvestorController::class, 'reply']);
+
     });
 
     Route::group(['prefix' => 'agent'], function () {
         Route::get('/projects', [AgentController::class, 'projectList']);
         Route::post('/projects/update/store/{id?}', [AgentController::class, 'projectUpdateStore']);
+        Route::get('/projects/update/{id?}', [AgentController::class, 'projectUpdate']);
+        //comment by Projectupdate id
+        Route::post('/projects/comment/{id?}', [AgentController::class, 'comment']);
+        //reply by Comment id
+        Route::post('/projects/reply/{id?}', [AgentController::class, 'reply']);
     });
 
 });

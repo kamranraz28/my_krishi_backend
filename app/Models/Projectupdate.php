@@ -29,4 +29,9 @@ class Projectupdate extends Model
         return $this->belongsTo(User::class, 'updated_by');
     }
 
+    public function comment()
+    {
+        return $this->hasMany(Comment::class, 'projectupdate_id');
+    }
+
 }
