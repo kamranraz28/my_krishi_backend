@@ -26,7 +26,7 @@ class Projectupdate extends Model
     }
     public function user()
     {
-        return $this->belongsTo(User::class, 'updated_by');
+        return $this->belongsTo(User::class, 'update_by');
     }
 
     public function comment()
