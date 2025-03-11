@@ -5,12 +5,9 @@
 @section('content')
 
     <!-- Page Header Section -->
-    <section class="page-header">
-        <div class="page-header__shape-left"></div>
-        <div class="page-header__shape-right"></div>
-        <div class="page-header__bg"></div>
+    <section class="page-header text-center py-5" style="background-color: #f8f9fa;">
         <div class="container">
-            <h2 class="page-header__title">Projects</h2>
+            <h4 class="page-header__title display-4 font-weight-bold text-primary mb-3">Project List</h4>
         </div>
     </section>
 
@@ -73,13 +70,18 @@
                                     <i class="icofont-arrow-right"></i> Updates
                                 </a>
 
-                                <a href="{{ url('/project-details/' . $project->id) }}" class="btn btn-primary">
+                                <a href="{{ route('projectPeople', ['id' => $project->id]) }}" class="btn btn-primary">
                                     <i class="icofont-arrow-right"></i> People
                                 </a>
 
                                 <a href="{{ route('project.edit',['id'=>$project->id]) }}" class="btn btn-primary">
                                     <i class="icofont-arrow-right"></i> Edit
                                 </a>
+
+                                <a href="{{ route('projectCosts',['id'=>$project->id]) }}" class="btn btn-primary" style="margin-top: 5px;">
+                                    <i class="icofont-arrow-right"></i> Finance
+                                </a>
+
                             </div>
                         </div>
                     </div>

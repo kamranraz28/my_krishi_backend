@@ -5,7 +5,14 @@
 @section('content')
     <section class="project-updates">
         <div class="container">
-            <h3>Project Updates:</h3>
+            <!-- Page Header Section -->
+            <section class="page-header text-center py-5" style="background-color: #f8f9fa;">
+                <div class="container">
+                    <h4 class="page-header__title display-4 font-weight-bold text-primary mb-3">{{ $project->details->title }}</h4>
+                    <h5 class="mb-3">Total Units: <span class="text-muted">{{ $project->details->unit }}</span></h5>
+                    <h5 class="mb-3">Total Price: <span class="text-muted">{{ $project->details->total_price }}</span></h5>
+                </div>
+            </section>
 
             @php
                 $levels = [

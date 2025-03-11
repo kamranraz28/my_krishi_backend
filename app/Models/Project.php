@@ -12,6 +12,7 @@ class Project extends Model
     protected $fillable = [
         'created_by',
         'status',
+        'unique_id',
     ];
 
     public function user()
@@ -36,6 +37,10 @@ class Project extends Model
     public function agent()
     {
         return $this->hasMany(Projectagent::class, 'project_id');
+    }
+    public function cost()
+    {
+        return $this->hasMany(Projectcost::class, 'project_id');
     }
 
 }

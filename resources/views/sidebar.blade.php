@@ -45,6 +45,22 @@
                         <span class="pcoded-mtext">Projects</span>
                     </a>
                 </li>
+                <li class="nav-item pcoded-hasmenu">
+                    <a href="#!" class="nav-link">
+                        <span class="pcoded-micon"><i class="feather icon-align-justify"></i></span>
+                        <span class="pcoded-mtext">People</span>
+                    </a>
+                    <ul class="pcoded-submenu">
+                        <li><a href="{{ route('agents') }}">Agent</a></li>
+                        <li><a href="{{ route('investors') }}">Investor</a></li>
+                    </ul>
+                </li>
+                <!-- <li class="nav-item">
+                    <a href="{{ route('projects') }}" class="nav-link">
+                        <span class="pcoded-micon"><i class="feather icon-box"></i></span>
+                        <span class="pcoded-mtext">Close</span>
+                    </a>
+                </li> -->
 
 
             </ul>

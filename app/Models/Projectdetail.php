@@ -20,10 +20,19 @@ class Projectdetail extends Model
         'image',
         'duration',
         'return_amount',
+        'closing_amount',
+        'service_charge',
     ];
+
+    protected $appends = ['image_url'];
+
 
     public function project()
     {
         return $this->belongsTo(Project::class, 'project_id');
+    }
+    public function getImageUrlAttribute()
+    {
+        return url('uploads/projects/' . $this->image);
     }
 }

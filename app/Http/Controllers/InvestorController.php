@@ -133,7 +133,7 @@ class InvestorController extends Controller
             ], 401);
         }
 
-        $bookings = Booking::with('investor', 'project')->where('investor_id', $user->id)->get();
+        $bookings = Booking::with('investor', 'project.details')->where('investor_id', $user->id)->get();
 
         return response()->json([
             'status' => 'success',

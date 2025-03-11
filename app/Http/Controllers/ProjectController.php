@@ -82,6 +82,11 @@ class ProjectController extends Controller
                 'created_by' => $user->id,
                 'status' => $request->status
             ]);
+
+            // Generate unique_id using user ID (e.g., AG01, AG02)
+            $project->update([
+                'unique_id' => 'MKPR' . str_pad($project->id, 2, '0', STR_PAD_LEFT),
+            ]);
         } catch (\Exception $e) {
             \Log::error('Project creation failed: ' . $e->getMessage());
             return response()->json([

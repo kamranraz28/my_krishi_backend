@@ -28,7 +28,23 @@ Route::middleware(['auth', 'preventBackAfterLogout'])->group(function () {
     Route::post('/project-store', [WebController::class, 'storeProject'])->name('storeProject');
     Route::put('/project-update/{id}', [WebController::class, 'updateProject'])->name('projects.update');
     Route::get('/projects/updates/{id?}', [WebController::class, 'projectUpdates'])->name('projectUpdates');
-
+    Route::get('/project-people/{id?}', [WebController::class, 'projectPeople'])->name('projectPeople');
+    Route::get('/investor-history/{id?}', [WebController::class, 'investorHistory'])->name('investorHistory');
     Route::post('/comment/{id?}', [WebController::class, 'comment'])->name('comment');
+    Route::post('/assign-agent', [WebController::class, 'assignAgent'])->name('assign.agent');
+    Route::delete('/agent/{id}/delete', [WebController::class, 'deleteAgent'])->name('agent.delete');
+    Route::post('/assign-investor', [WebController::class, 'assignInvestor'])->name('assign.investor');
+    Route::get('/agents', [WebController::class, 'agents'])->name('agents');
+    Route::delete('/agent/delete/{id?}', [WebController::class, 'agentDelete'])->name('agentDelete');
+    Route::post('/agent-store', [WebController::class, 'agentStore'])->name('agentStore');
+    Route::get('/investors', [WebController::class, 'investors'])->name('investors');
+    Route::delete('/investor/delete/{id?}', [WebController::class, 'investorDelete'])->name('investorDelete');
+    Route::post('/investor-store', [WebController::class, 'investorStore'])->name('investorStore');
+    Route::get('/projects/costs/{id?}', [WebController::class, 'projectCosts'])->name('projectCosts');
+    Route::post('/projects/costs/store', [WebController::class, 'projectCostsStore'])->name('projectCostsStore');
+    Route::post('/projects/close', [WebController::class, 'projectClose'])->name('projectClose');
+    Route::get('/projects/finance/details/{id?}', [WebController::class, 'financeDetails'])->name('financeDetails');
+    Route::get('project/print-finance-details/{id}', [WebController::class, 'printFinanceDetails'])->name('printFinanceDetails');
+
 
 });
