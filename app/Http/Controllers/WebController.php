@@ -437,7 +437,7 @@ class WebController extends Controller
         $profitPerUnit = $netProfit / $unit;
 
         // Render the HTML content from the view
-        $html = view('project.pdf-finance-details', compact('profit', 'revenue', 'serviceChargePercent', 'netProfit', 'unit', 'profitPerUnit', 'project', 'totalCost'))->render();
+        $html = view('project.pdf-finance-details', compact('costs','profit', 'revenue', 'serviceChargePercent', 'netProfit', 'unit', 'profitPerUnit', 'project', 'totalCost'))->render();
 
         // Initialize mPDF
         $mpdf = new Mpdf();
