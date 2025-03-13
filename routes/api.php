@@ -35,14 +35,18 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/projects', [InvestorController::class, 'projectList']);
         Route::get('/projects/details/{id?}', [InvestorController::class, 'projectDetails']);
         Route::get('/projects/booking/{id?}', [InvestorController::class, 'projectBooking']);
-        Route::post('/projects/booking/confirm/{id?}', [InvestorController::class, 'confirmBooking']);
+        Route::post('/projects/booking/cart/{id?}', [InvestorController::class, 'addToCart']);
+        Route::get('/carts', [InvestorController::class, 'cartList']);
+        Route::get('/carts/edit/{id?}', [InvestorController::class, 'cartEdit']);
+        Route::put('/carts/update/{id?}', [InvestorController::class, 'cartUpdate']);
+        Route::get('/carts/remove/{id?}', [InvestorController::class, 'removeFromCart']);
+        Route::post('/carts/confirm', [InvestorController::class, 'cartConfirm']);
         Route::get('/projects/my-bookings', [InvestorController::class, 'myBookings']);
         Route::get('/projects/update/{id?}', [InvestorController::class, 'projectUpdate']);
         //comment by Projectupdate id
         Route::post('/projects/comment/{id?}', [InvestorController::class, 'comment']);
         //reply by Comment id
         Route::post('/projects/reply/{id?}', [InvestorController::class, 'reply']);
-
     });
 
     Route::group(['prefix' => 'agent'], function () {

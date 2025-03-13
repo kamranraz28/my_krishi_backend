@@ -62,7 +62,13 @@
                                         @foreach($agents as $key => $agent)
                                             <tr>
                                                 <td>{{ $key + 1 }}</td>
-                                                <td>{{ $agent->name ?? ''}}</td>
+                                                <td><button type="button" class="btn btn-info btn-sm d-block">
+                                                        {{ $agent->name ?? '' }}
+                                                    </button>
+
+                                                    <span
+                                                        class="badge bg-primary mt-1 d-inline-block">{{ $agent->unique_id ?? ''}}</span>
+                                                </td>
                                                 <td>{{ $agent->unique_id ?? ''}}</td>
                                                 <td>{{ $agent->phone ?? ''}}</td>
                                                 <td>{{ $agent->email ?? ''}}</td>
@@ -107,15 +113,18 @@
                     <div class="modal-body">
                         <div class="mb-3">
                             <label for="name" class="form-label">Agent Name</label>
-                            <input type="text" class="form-control" name="name" id="name" placeholder="Enter Agent Name" required>
+                            <input type="text" class="form-control" name="name" id="name" placeholder="Enter Agent Name"
+                                required>
                         </div>
                         <div class="mb-3">
                             <label for="phone" class="form-label">Agent Phone</label>
-                            <input type="text" class="form-control" name="phone" id="phone" placeholder="Enter Agent Phone" required>
+                            <input type="text" class="form-control" name="phone" id="phone" placeholder="Enter Agent Phone"
+                                required>
                         </div>
                         <div class="mb-3">
                             <label for="email" class="form-label">Agent Email</label>
-                            <input type="email" class="form-control" name="email" id="email" placeholder="Enter Agent Email" required>
+                            <input type="email" class="form-control" name="email" id="email" placeholder="Enter Agent Email"
+                                required>
                         </div>
                     </div>
                     <div class="modal-footer">

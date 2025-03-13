@@ -42,5 +42,9 @@ class Project extends Model
     {
         return $this->hasMany(Projectcost::class, 'project_id');
     }
+    public function cart()
+    {
+        return $this->hasMany(Cart::class, 'project_id');
+    }
 
 }

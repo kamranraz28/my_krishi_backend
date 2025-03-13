@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Booking;
+use App\Models\Cart;
 use App\Models\Comment;
 use App\Models\Project;
 use App\Models\Projectupdate;
@@ -90,7 +91,7 @@ class InvestorController extends Controller
         ], 200);
     }
 
-    public function confirmBooking(Request $request, $id)
+    public function addToCart(Request $request, $id)
     {
         $user = Auth::user();
 
@@ -102,24 +103,158 @@ class InvestorController extends Controller
         }
 
         try {
-            Booking::create([
+            Cart::create([
                 'project_id' => $id,
                 'investor_id' => $user->id,
-                'total_unit' => $request->total_unit
+                'unit' => $request->total_unit
             ]);
         } catch (\Exception $e) {
-            \Log::error('Project booking failed: ' . $e->getMessage());
+            \Log::error('Add To Cart failed: ' . $e->getMessage());
             return response()->json([
                 'status' => 'error',
-                'message' => 'An error occurred while booking the project.'
+                'message' => 'An error occurred while adding the project to the cart.'
             ], 500);
         }
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Project Booking Successfull.'
+            'message' => 'Add to cart Successfull.'
         ], 200);
 
+    }
+
+    public function cartList()
+    {
+        $user = Auth::user();
+
+        if ($user->level !== 200) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'You are not eligible to do this.'
+            ], 401);
+        }
+
+        $carts = Cart::with('project.details')->where('investor_id', $user->id)->get();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Showing all carts',
+            'carts' => $carts
+        ],200);
+    }
+
+    public function cartConfirm(Request $request)
+    {
+        $user = Auth::user();
+
+        if ($user->level !== 200) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'You are not eligible to do this.'
+            ], 401);
+        }
+
+        $projects = $request->project_id;
+        $units = $request->unit;
+
+        foreach ($projects as $key => $project) {
+            Booking::create([
+                'project_id' => $project,
+                'investor_id' => $user->id,
+                'total_unit' => $units[$key]
+            ]);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Booking successfull'
+        ],200);
+    }
+
+    public function removeFromCart($id)
+    {
+        $user = Auth::user();
+
+        if ($user->level !== 200) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'You are not eligible to do this.'
+            ], 401);
+        }
+
+        $cart = Cart::find($id);
+
+        if (!$cart) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Cart not found.'
+            ], 404);
+        }
+
+        $cart->delete();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Cart removed successfully.'
+        ], 200);
+    }
+
+    public function cartEdit($id)
+    {
+        $user = Auth::user();
+
+        if ($user->level !== 200) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'You are not eligible to do this.'
+            ], 401);
+        }
+
+        $cart = Cart::with('project.details')->find($id);
+
+        if (!$cart) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Cart not found.'
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Showing cart',
+            'cart' => $cart
+        ],200);
+    }
+
+    public function cartUpdate(Request $request, $id)
+    {
+        $user = Auth::user();
+
+        if ($user->level !== 200) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'You are not eligible to do this.'
+            ], 401);
+        }
+
+        $cart = Cart::find($id);
+
+        if (!$cart) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Cart not found.'
+            ], 404);
+        }
+
+        $cart->update([
+            'unit' => $request->unit
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Cart updated successfully.',
+            'cart' => $cart
+        ], 200);
     }
 
     public function myBookings()

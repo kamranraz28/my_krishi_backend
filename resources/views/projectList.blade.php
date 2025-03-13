@@ -1,7 +1,5 @@
 @extends('layouts.master')
 
-@section('title', 'Dashboard')
-
 @section('content')
 
     <!-- Page Header Section -->
@@ -37,6 +35,37 @@
         </div>
     @endif
 
+    <!-- Projects Section -->
+    <section class="blog-one">
+        <div class="container">
+            <div class="row gutter-y-30">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Filter By Status</h5>
+                        </div>
+                        <div class="card-body">
+                            <form action="{{ route('projectFilter') }}" method="POST" id="projectCostForm">
+                                @csrf
+                                <div id="field-container">
+                                    <div class="row mb-3 field-group">
+                                        <div class="col-md-5">
+                                            <select class="form-control" name="status" id="status">
+                                                <option value="">All</option>
+                                                <option value="1" {{ session('status') == '1' ? 'selected' : '' }}>Running</option>
+                                                <option value="5" {{ session('status') == '5' ? 'selected' : '' }}>Closed</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    </section>
+
+
 
 
 
@@ -53,15 +82,29 @@
                                     alt="{{ $project->details->title }}" class="img-fluid" style="height: 200px;">
                             </div>
                             <div class="card-body">
-                                <ul class="list-unstyled">
-                                    <li><i class="icofont-location-pin"></i> {{ $project->details->location }}</li>
-                                    <li><i class="fa-solid fa-bangladeshi-taka-sign"></i> BDT
-                                        {{ $project->details->unit_price }}/Unit
-                                    </li>
-                                </ul>
-                                <h3 class="card-title">
-                                    <a href="{{ url('uploads/projects/' . $project->id) }}">{{ $project->details->title }}</a>
-                                </h3>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <ul class="list-unstyled mb-0">
+                                        <li><i class="icofont-location-pin"></i> {{ $project->details->location }}</li>
+                                        <li><i class="fa-solid fa-bangladeshi-taka-sign"></i> BDT
+                                            {{ $project->details->unit_price }}/Unit</li>
+                                    </ul>
+                                    <span class="badge
+                                            @if($project->status == 1) bg-primary
+                                            @elseif($project->status == 5) bg-danger
+                                                @else bg-secondary
+                                            @endif">
+                                        @if($project->status == 1) Running
+                                        @elseif($project->status == 5) Closed
+                                            @else Unknown
+                                        @endif
+                                    </span>
+                                </div>
+                                <br>
+
+                                <h4 class="card-title">
+                                    <a
+                                        href="{{ url('uploads/projects/' . $project->id) }}">{{ $project->details->title }}-{{ $project->unique_id }}</a>
+                                </h4>
                                 <p class="card-text">
                                     Period: {{ $project->details->duration }} <br />
                                     Return: {{ $project->details->return_amount }}%
@@ -74,11 +117,12 @@
                                     <i class="icofont-arrow-right"></i> People
                                 </a>
 
-                                <a href="{{ route('project.edit',['id'=>$project->id]) }}" class="btn btn-primary">
+                                <a href="{{ route('project.edit', ['id' => $project->id]) }}" class="btn btn-primary">
                                     <i class="icofont-arrow-right"></i> Edit
                                 </a>
 
-                                <a href="{{ route('projectCosts',['id'=>$project->id]) }}" class="btn btn-primary" style="margin-top: 5px;">
+                                <a href="{{ route('projectCosts', ['id' => $project->id]) }}" class="btn btn-primary"
+                                    style="margin-top: 5px;">
                                     <i class="icofont-arrow-right"></i> Finance
                                 </a>
 
@@ -88,6 +132,42 @@
                 @endforeach
             </div>
         </div>
+        <div class="d-flex justify-content-center mt-4">
+            <nav>
+                <ul class="pagination">
+                    @if ($projects->onFirstPage())
+                        <li class="page-item disabled">
+                            <span class="page-link"><i class="fas fa-angle-left"></i></span>
+                        </li>
+                    @else
+                        <li class="page-item">
+                            <a class="page-link" href="{{ $projects->previousPageUrl() }}" aria-label="Previous">
+                                <i class="fas fa-angle-left"></i>
+                            </a>
+                        </li>
+                    @endif
+
+                    @foreach ($projects->getUrlRange(1, $projects->lastPage()) as $page => $url)
+                        <li class="page-item {{ $projects->currentPage() == $page ? 'active' : '' }}">
+                            <a class="page-link" href="{{ $url }}">{{ $page }}</a>
+                        </li>
+                    @endforeach
+
+                    @if ($projects->hasMorePages())
+                        <li class="page-item">
+                            <a class="page-link" href="{{ $projects->nextPageUrl() }}" aria-label="Next">
+                                <i class="fas fa-angle-right"></i>
+                            </a>
+                        </li>
+                    @else
+                        <li class="page-item disabled">
+                            <span class="page-link"><i class="fas fa-angle-right"></i></span>
+                        </li>
+                    @endif
+                </ul>
+            </nav>
+        </div>
+
 
         <!-- Updated Modal -->
         <div class="modal fade" id="createProjectModal" tabindex="-1" aria-labelledby="createProjectModalLabel"
@@ -163,6 +243,12 @@
 
 
     </section>
+
+        <script>
+            document.getElementById("status").addEventListener("change", function () {
+                document.getElementById("projectCostForm").submit();
+        });
+    </script>
 
 @endsection
 

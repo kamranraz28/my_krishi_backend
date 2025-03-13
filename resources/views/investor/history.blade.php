@@ -61,11 +61,19 @@
                                         @foreach($bookings as $key => $booking)
                                             <tr>
                                                 <td>{{ $key + 1 }}</td>
+                                                <!-- <td>
+                                                    <a href="{{ route('projectUpdates', $booking->project_id) }}" class="btn btn-info btn-sm">
+                                                        {{ $booking->project->details->title }}
+                                                    </a>
+                                                    <span class="badge bg-primary ms-2">{{ $booking->project->unique_id }}</span>
+                                                </td> -->
                                                 <td>
-                                                <a href="{{ route('projectUpdates', $booking->project_id) }}" class="btn btn-info btn-sm">
-                                                    {{ $booking->project->details->title }}
-                                                </a>
-                                            </td>
+                                                    <a href="{{ route('projectUpdates', $booking->project_id) }}" class="btn btn-info btn-sm d-block">
+                                                        {{ $booking->project->details->title }}
+                                                    </a>
+                                                    <span class="badge bg-primary mt-1 d-inline-block">{{ $booking->project->unique_id }}</span>
+                                                </td>
+
                                                 <td>{{ $booking->project->details->unit_price }}</td>
                                                 <td>{{ $booking->total_unit }}</td>
                                                 <td>{{ ($booking->project->details->unit_price ?? 0) * ($booking->total_unit ?? 0) }}</td>
@@ -84,39 +92,6 @@
             </div>
     </section>
 
-    <!-- Add Agent Modal -->
-    <div class="modal fade" id="addAgentModal" tabindex="-1" aria-labelledby="addAgentModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="addAgentModalLabel">Create New Investor</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"><i
-                            class="fas fa-times"></i></button>
-                </div>
-                <form action="{{ route('investorStore') }}" method="POST">
-                    @csrf
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label for="name" class="form-label">Investor Name</label>
-                            <input type="text" class="form-control" name="name" id="name" placeholder="Enter Investor Name" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="phone" class="form-label">Investor Phone</label>
-                            <input type="text" class="form-control" name="phone" id="phone" placeholder="Enter Investor Phone" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="email" class="form-label">Investor Email</label>
-                            <input type="email" class="form-control" name="email" id="email" placeholder="Enter Investor Email" required>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary">Confirm Investor</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
 
 
 @endsection

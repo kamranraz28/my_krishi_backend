@@ -14,6 +14,7 @@ use Auth;
 use Hash;
 use Illuminate\Http\Request;
 use Mpdf\Mpdf;
+use Session;
 
 class WebController extends Controller
 {
@@ -54,9 +55,22 @@ class WebController extends Controller
 
     public function projects()
     {
-        $projects = Project::with('details')->orderBy('id', 'desc')->get();
+        $status = Session::get('status');
+        $projectQuery = Project::with('details');
+        if($status){
+            $projectQuery->where('status',$status);
+        }
+        $projects = $projectQuery->orderBy('id', 'desc')->paginate(9);
 
         return view('projectList', compact('projects'));
+    }
+
+    public function projectFilter(Request $request)
+    {
+        $status = $request->status;
+        Session::put('status', $status);
+
+        return redirect()->route('projects');
     }
 
     public function projectUpdates($id)

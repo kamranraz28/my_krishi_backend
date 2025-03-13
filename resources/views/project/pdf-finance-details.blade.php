@@ -74,7 +74,7 @@
         <table>
             <thead>
                 <tr>
-                    <th>#</th>
+                    <th>SN</th>
                     <th>Cost Field</th>
                     <th>Cost Value</th>
                 </tr>

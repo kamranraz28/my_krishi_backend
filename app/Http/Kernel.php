@@ -68,6 +68,7 @@ class Kernel extends HttpKernel
     protected $routeMiddleware = [
         // Other middlewares...
         'preventBackAfterLogout' => \App\Http\Middleware\PreventBackAfterLogout::class,
+        'jwt.auth' => \App\Http\Middleware\JwtMiddleware::class,
     ];
 
 }

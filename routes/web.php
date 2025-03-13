@@ -24,6 +24,7 @@ Route::middleware(['auth', 'preventBackAfterLogout'])->group(function () {
     Route::get('/dashboard', [WebController::class, 'dashboard'])->name('dashboard');
     Route::get('/user-logout', [WebController::class, 'userLogout'])->name('userLogout');
     Route::get('/projects', [WebController::class, 'projects'])->name('projects');
+    Route::post('/project-filter', [WebController::class, 'projectFilter'])->name('projectFilter');
     Route::get('/project-edit/{id?}', [WebController::class, 'projectEdit'])->name('project.edit');
     Route::post('/project-store', [WebController::class, 'storeProject'])->name('storeProject');
     Route::put('/project-update/{id}', [WebController::class, 'updateProject'])->name('projects.update');

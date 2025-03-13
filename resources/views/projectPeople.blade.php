@@ -49,7 +49,6 @@
                                     <tr>
                                         <th>#</th>
                                         <th>Name</th>
-                                        <th>Investor ID</th>
                                         <th>Email</th>
                                         <th>Price/Unit</th>
                                         <th>Number of Units</th>
@@ -62,19 +61,18 @@
                                         <tr>
                                             <td>{{ $key + 1 }}</td>
                                             <td>
-                                                <a href="{{ route('investorHistory', $booking->investor->id) }}" class="btn btn-info btn-sm">
+                                                <a href="{{ route('investorHistory', $booking->investor->id) }}"
+                                                    class="btn btn-info btn-sm d-block">
                                                     {{ $booking->investor->name ?? '' }}
                                                 </a>
-                                            </td>
-                                            <td>
-                                                <a href="{{ route('investorHistory', $booking->investor->id) }}" class="btn btn-info btn-sm">
-                                                    {{ $booking->investor->unique_id ?? '' }}
-                                                </a>
+                                                <span
+                                                    class="badge bg-primary mt-1 d-inline-block">{{ $booking->investor->unique_id }}</span>
                                             </td>
                                             <td>{{ $booking->investor->email ?? '' }}</td>
                                             <td>{{ $booking->project->details->unit_price ?? ''}}</td>
                                             <td>{{ $booking->total_unit ?? ''}}</td>
-                                            <td>{{ ($booking->project->details->unit_price ?? 0) * ($booking->total_unit ?? 0) }}</td>
+                                            <td>{{ ($booking->project->details->unit_price ?? 0) * ($booking->total_unit ?? 0) }}
+                                            </td>
                                             <td>{{ $booking->created_at->format('d M, Y') }}</td>
                                         </tr>
                                     @endforeach
@@ -94,8 +92,7 @@
                                 <thead>
                                     <tr>
                                         <th>#</th>
-                                        <th>Name</th>
-                                        <th>Agent ID</th>
+                                        <th>Agent Name</th>
                                         <th>Email</th>
                                         <th>Action</th>
                                     </tr>
@@ -104,8 +101,13 @@
                                     @foreach($agents as $key => $agent)
                                         <tr>
                                             <td>{{ $key + 1 }}</td>
-                                            <td>{{ $agent->user->name }}</td>
-                                            <td>{{ $agent->user->unique_id }}</td>
+                                            <td><button type="button" class="btn btn-info btn-sm d-block">
+                                                    {{ $agent->user->name ?? '' }}
+                                                </button>
+
+                                                <span
+                                                    class="badge bg-primary mt-1 d-inline-block">{{ $agent->user->unique_id ?? ''}}</span>
+                                            </td>
                                             <td>{{ $agent->user->email }}</td>
                                             <td>
                                                 <form action="{{ route('agent.delete', $agent->id) }}" method="POST"

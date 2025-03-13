@@ -52,12 +52,8 @@
                                         <tr>
                                             <th>#</th>
                                             <th>Name</th>
-                                            <th>Investor ID</th>
                                             <th>Phone</th>
                                             <th>Email</th>
-                                            <th>Project Booked</th>
-                                            <th>Number of Unit</th>
-                                            <th>Booking Date</th>
                                             <th>Action</th>
                                         </tr>
                                     </thead>
@@ -65,13 +61,18 @@
                                         @foreach($investors as $key => $investor)
                                             <tr>
                                                 <td>{{ $key + 1 }}</td>
-                                                <td>{{ $investor->name ?? ''}}</td>
-                                                <td>{{ $investor->unique_id ?? ''}}</td>
+                                                <td>
+                                                    <a href="{{ route('investorHistory', $investor->id) }}"
+                                                        class="btn btn-info btn-sm d-block">
+                                                        {{ $investor->name ?? '' }}
+                                                    </a>
+                                                    <span
+                                                        class="badge bg-primary mt-1 d-inline-block">{{ $investor->unique_id ?? ''}}</span>
+                                                </td>
+
                                                 <td>{{ $investor->phone ?? ''}}</td>
                                                 <td>{{ $investor->email ?? ''}}</td>
-                                                <td>{{ $investor->booking->first()->project->details->title ?? ''}}</td>
-                                                <td>{{ $investor->booking->first()->total_unit ?? ''}}</td>
-                                                <td>{{ $investor->booking->first()->created_at ?? ''}}</td>
+
                                                 <td>
                                                     <form action="{{ route('investorDelete', $investor->id) }}" method="POST"
                                                         style="display: inline;"
@@ -111,15 +112,18 @@
                     <div class="modal-body">
                         <div class="mb-3">
                             <label for="name" class="form-label">Investor Name</label>
-                            <input type="text" class="form-control" name="name" id="name" placeholder="Enter Investor Name" required>
+                            <input type="text" class="form-control" name="name" id="name" placeholder="Enter Investor Name"
+                                required>
                         </div>
                         <div class="mb-3">
                             <label for="phone" class="form-label">Investor Phone</label>
-                            <input type="text" class="form-control" name="phone" id="phone" placeholder="Enter Investor Phone" required>
+                            <input type="text" class="form-control" name="phone" id="phone"
+                                placeholder="Enter Investor Phone" required>
                         </div>
                         <div class="mb-3">
                             <label for="email" class="form-label">Investor Email</label>
-                            <input type="email" class="form-control" name="email" id="email" placeholder="Enter Investor Email" required>
+                            <input type="email" class="form-control" name="email" id="email"
+                                placeholder="Enter Investor Email" required>
                         </div>
                     </div>
                     <div class="modal-footer">
