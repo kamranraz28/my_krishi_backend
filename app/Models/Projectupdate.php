@@ -26,12 +26,19 @@ class Projectupdate extends Model
     }
     public function user()
     {
-        return $this->belongsTo(User::class, 'update_by');
+        return $this->belongsTo(User::class, 'update_by')
+            ->select('id', 'name', 'level', 'unique_id');
     }
+
 
     public function comment()
     {
         return $this->hasMany(Comment::class, 'projectupdate_id');
     }
+    public function reactions()
+    {
+        return $this->morphMany(Reaction::class, 'reactable');
+    }
+
 
 }

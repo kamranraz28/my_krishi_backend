@@ -21,10 +21,15 @@ class Comment extends Model
     }
     public function user()
     {
-        return $this->belongsTo(User::class, 'comment_by');
+        return $this->belongsTo(User::class, 'comment_by')
+            ->select('id', 'name', 'level', 'unique_id');
     }
     public function reply()
     {
         return $this->hasMany(Reply::class, 'comment_id');
+    }
+    public function reactions()
+    {
+        return $this->morphMany(Reaction::class, 'reactable');
     }
 }

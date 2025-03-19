@@ -91,8 +91,12 @@ class AgentController extends Controller
     public function projectUpdate($id)
     {
         // Fetch project updates for the given project ID
-        $projectUpdates = Projectupdate::with('comment.reply')->where('project_id', $id)->get();
-
+    // Fetch project updates with comments, replies, users, and reactions
+    $projectUpdates = Projectupdate::with([
+        'user',
+        'comment.user',
+        'comment.reply.user',
+    ])->where('project_id', $id)->get();
         // Transform the project updates to format images correctly
         $projectUpdates->transform(function ($update) {
             // Decode JSON images

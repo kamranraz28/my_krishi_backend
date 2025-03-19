@@ -38,6 +38,7 @@
                             </div>
                         </div>
                     </div>
+                    <br>
                     <div class="post-body">
                         <p>{{ $update->description }}</p>
                         @foreach($update->image_urls as $image)
@@ -132,7 +133,7 @@
     }
 
     .post-image {
-        max-width: 25%;
+        max-width: 20%;
         border-radius: 8px;
         margin-top: 10px;
     }

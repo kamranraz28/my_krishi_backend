@@ -35,11 +35,39 @@ class WebController extends Controller
 
     public function dashboard()
     {
-        $projects = Project::count();
-        $agents = User::where('level', 300)->count();
-        $investors = User::where('level', 200)->count();
-        $bookings = Booking::count();
-        return view('dashboard', compact('projects', 'agents', 'investors', 'bookings'));
+        $users = User::all();
+        $totalUsers = $users->count();
+        $admin = $users->where('level', 100)->count();
+        $investors = $users->where('level', 200)->count();
+        $agents = $users->where('level', 300)->count();
+        $projects = Project::all();
+        $totalProject = $projects->count();
+        $runningProjects = $projects->where('status', 1)->count();
+        $completedProjects = $projects->where('status', 5)->count();
+        $draftProjects = $projects->where('status', 0)->count();
+        $bookings = Booking::all();
+        $totalBooking = $bookings->count();
+        $todayBooking = $bookings->where('created_at', '>=', now()->startOfDay())->count();
+        $thisMonthBooking = $bookings->where('created_at', '>=', now()->startOfMonth())->count();
+        $thisYearBooking = $bookings->where('created_at', '>=', now()->startOfYear())->count();
+        $totalUnits = $bookings->sum('total_unit');
+        $totalAmount = $bookings->sum(fn($booking) => $booking->total_unit * $booking->project->details->unit_price);
+        return view('dashboard', compact([
+            'agents',
+            'investors',
+            'totalProject',
+            'runningProjects',
+            'completedProjects',
+            'draftProjects',
+            'totalBooking',
+            'totalUsers',
+            'admin',
+            'todayBooking',
+            'thisMonthBooking',
+            'thisYearBooking',
+            'totalUnits',
+            'totalAmount'
+        ]));
     }
 
     public function userLogout(Request $request)

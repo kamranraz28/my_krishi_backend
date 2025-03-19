@@ -25,7 +25,7 @@ class InvestorController extends Controller
             ], 401);
         }
 
-        $projects = Project::with('details')->get();
+        $projects = Project::with('details','cart')->get();
 
         return response()->json([
             'status' => 'success',
@@ -44,7 +44,7 @@ class InvestorController extends Controller
             ], 401);
         }
         // Fetch the project with the 'details' relationship using eager loading
-        $details = Project::with('details')->find($id);
+        $details = Project::with('details','cart')->find($id);
 
         // Check if the project exists
         if (!$details) {
@@ -164,6 +164,8 @@ class InvestorController extends Controller
                 'total_unit' => $units[$key]
             ]);
         }
+        // Delete the user's cart after booking
+        Cart::where('investor_id', $user->id)->delete();
 
         return response()->json([
             'status' => 'success',
@@ -171,7 +173,7 @@ class InvestorController extends Controller
         ],200);
     }
 
-    public function removeFromCart($id)
+    public function removeFromCart(Request $request)
     {
         $user = Auth::user();
 
@@ -182,22 +184,25 @@ class InvestorController extends Controller
             ], 401);
         }
 
-        $cart = Cart::find($id);
+        $ids = $request->cart_id;
 
-        if (!$cart) {
+        // Ensure $ids is an array
+        if (!is_array($ids) || empty($ids)) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Cart not found.'
-            ], 404);
+                'message' => 'Invalid cart IDs.'
+            ], 400);
         }
 
-        $cart->delete();
+        // Delete the retrieved carts
+        Cart::whereIn('id', $ids)->delete();
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Cart removed successfully.'
+            'message' => 'Carts removed successfully.'
         ], 200);
     }
+
 
     public function cartEdit($id)
     {
@@ -280,16 +285,49 @@ class InvestorController extends Controller
 
     public function projectUpdate($id)
     {
-        // Fetch project updates for the given project ID
-        $projectUpdates = Projectupdate::with('comment.reply')->where('project_id', $id)->get();
+        // Fetch project updates with comments, replies, users, and reactions
+        $projectUpdates = Projectupdate::with([
+            'user',
+            'comment.user',
+            'comment.reply.user',
+            'reactions',  // Fetch reactions for updates
+            'comment.reactions', // Fetch reactions for comments
+            'comment.reply.reactions' // Fetch reactions for replies
+        ])->where('project_id', $id)->get();
 
-        // Transform the project updates to format images correctly
+        // Transform the project updates
         $projectUpdates->transform(function ($update) {
             // Decode JSON images
             $images = json_decode($update->image, true) ?? [];
-
-            // Generate full URLs for images
             $update->image_urls = array_map(fn($path) => url($path), $images);
+
+            // Attach reaction summary for update
+            $update->reaction_summary = $update->reactions()
+                ->selectRaw('type, COUNT(*) as count')
+                ->groupBy('type')
+                ->pluck('count', 'type');
+
+            // Transform comments
+            $update->comment->transform(function ($comment) {
+                // Attach reaction summary for comments
+                $comment->reaction_summary = $comment->reactions()
+                    ->selectRaw('type, COUNT(*) as count')
+                    ->groupBy('type')
+                    ->pluck('count', 'type');
+
+                // Transform replies
+                $comment->reply->transform(function ($reply) {
+                    // Attach reaction summary for replies
+                    $reply->reaction_summary = $reply->reactions()
+                        ->selectRaw('type, COUNT(*) as count')
+                        ->groupBy('type')
+                        ->pluck('count', 'type');
+
+                    return $reply;
+                });
+
+                return $comment;
+            });
 
             return $update;
         });
@@ -301,6 +339,7 @@ class InvestorController extends Controller
             'updates' => $projectUpdates
         ], 200);
     }
+
 
 
     public function comment(Request $request, $id)

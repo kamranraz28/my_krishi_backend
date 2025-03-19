@@ -46,6 +46,7 @@ Route::middleware(['auth', 'preventBackAfterLogout'])->group(function () {
     Route::post('/projects/close', [WebController::class, 'projectClose'])->name('projectClose');
     Route::get('/projects/finance/details/{id?}', [WebController::class, 'financeDetails'])->name('financeDetails');
     Route::get('project/print-finance-details/{id}', [WebController::class, 'printFinanceDetails'])->name('printFinanceDetails');
+    Route::post('/react', [WebController::class, 'react'])->name('react');
 
 
 });

@@ -93,6 +93,7 @@
                                     <tr>
                                         <th>#</th>
                                         <th>Agent Name</th>
+                                        <th>Phone</th>
                                         <th>Email</th>
                                         <th>Action</th>
                                     </tr>
@@ -108,7 +109,8 @@
                                                 <span
                                                     class="badge bg-primary mt-1 d-inline-block">{{ $agent->user->unique_id ?? ''}}</span>
                                             </td>
-                                            <td>{{ $agent->user->email }}</td>
+                                            <td>{{ $agent->user->phone ?? ''}}</td>
+                                            <td>{{ $agent->user->email ?? ''}}</td>
                                             <td>
                                                 <form action="{{ route('agent.delete', $agent->id) }}" method="POST"
                                                     style="display: inline;"

@@ -23,6 +23,12 @@ class Reply extends Model
     }
     public function user()
     {
-        return $this->belongsTo(User::class, 'replied_by');
+        return $this->belongsTo(User::class, 'replied_by')
+            ->select('id', 'name', 'level', 'unique_id');
     }
+    public function reactions()
+    {
+        return $this->morphMany(Reaction::class, 'reactable');
+    }
+
 }
