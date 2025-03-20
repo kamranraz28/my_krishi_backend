@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Facades\Http;
+use App\Events\OtpRequested;
 
 class AuthController extends Controller
 {
@@ -55,52 +56,22 @@ class AuthController extends Controller
             'phone' => 'required|digits:11'
         ]);
 
-        // Generate a unique 6-digit OTP
         $otp = random_int(100000, 999999);
-
-        // Hash the OTP before storing
         $hashedOtp = Hash::make($otp);
 
-        // Find or create user
         $user = User::updateOrCreate(
             ['phone' => $request->phone],
-            [
-                'password' => $hashedOtp, // Store OTP as password
-                'level' => 200, // Insert level 200
-            ]
+            ['password' => $hashedOtp, 'level' => 200]
         );
 
+        // Dispatch the event
+        event(new OtpRequested($user, $otp));
 
-        // Fetch credentials from .env
-        $apiKey = config('services.sms.api_key');
-        $senderId = config('services.sms.sender_id');
-        $smsApiUrl = config('services.sms.api_url');
-
-        // Construct message
-        $message = "My Krishi OTP code is: $otp";
-
-        // Send OTP via SMS API
-        $response = Http::get($smsApiUrl, [
-            'api_key' => $apiKey,
-            'type' => 'text',
-            'number' => $request->phone,
-            'senderid' => $senderId,
-            'message' => $message
-        ]);
-
-        // Check if SMS was sent successfully
-        if ($response->successful()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'OTP sent successfully',
-                'phone' => $request->phone
-            ], 200);
-        } else {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to send OTP'
-            ], 500);
-        }
+        return response()->json([
+            'success' => true,
+            'message' => 'OTP sent successfully',
+            'phone' => $request->phone
+        ], 200);
     }
 
     public function verifyOtp(Request $request)
