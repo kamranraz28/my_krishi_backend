@@ -10,17 +10,54 @@ use App\Models\Projectcost;
 use App\Models\Projectdetail;
 use App\Models\Projectupdate;
 use App\Models\User;
+use App\Repositories\UserRepository;
 use Auth;
 use Hash;
 use Illuminate\Http\Request;
 use Mpdf\Mpdf;
 use Session;
+use Illuminate\Support\Facades\Redis;
+use Illuminate\Support\Facades\Cache;
+use App\Repositories\ProjectRepository;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\Paginator;
+
 
 class WebController extends Controller
 {
     //
+    protected $projectRepository;
+    protected $userRepository;
+    public function __construct(ProjectRepository $projectRepository, UserRepository $userRepository)
+    {
+        $this->projectRepository = $projectRepository;
+        $this->userRepository = $userRepository;
+    }
+
+    public function refreshProjectCache()
+    {
+        // Clear existing project cache
+        $this->projectRepository->forgetAllProjectsCache();
+        $this->userRepository->forgetAllAgentsCache();
+
+        // Re-cache all projects
+        $this->projectRepository->cacheAllProjects();
+        $this->userRepository->cacheAgent();
+
+        return response()->json([
+            'message' => 'Project cache refreshed successfully!',
+            'projects' => $this->projectRepository->getAllCachedProjects(),
+            'agents' => $this->userRepository->cacheAgent(),
+        ]);
+    }
     public function userLogin(Request $request)
     {
+        if (!Cache::has('agents')) {
+            $this->userRepository->cacheAgent();
+        }
+
+        //$this->userRepository->debugAgentCache();
+
         $user = User::where('email', $request->email)->first();
 
         if ($user && Hash::check($request->password, $user->password)) {
@@ -83,15 +120,46 @@ class WebController extends Controller
 
     public function projects()
     {
-        $status = Session::get('status');
-        $projectQuery = Project::with('details');
-        if($status){
-            $projectQuery->where('status',$status);
+        // Cache all projects if not already cached
+
+        if (!Cache::has('all_projects')) {
+            $this->projectRepository->cacheAllProjects();
         }
-        $projects = $projectQuery->orderBy('id', 'desc')->paginate(9);
+
+        //$this->projectRepository->debugProjectCache();
+        $status = Session::get('status');
+
+        // Fetch cached data
+        $projects = $this->projectRepository->getAllCachedProjects();
+
+
+        // Filter and sort the cached data manually
+        $projects = collect($projects);
+
+        if ($status) {
+            $projects = $projects->where('status', $status);
+        }
+
+        // Sort by ID in descending order
+        $projects = $projects->sortByDesc('id');
+
+        // Paginate the sorted data
+        $currentPage = LengthAwarePaginator::resolveCurrentPage();
+        $perPage = 9;
+        $currentItems = $projects->slice(($currentPage - 1) * $perPage, $perPage)->all();
+
+        // Create LengthAwarePaginator instance
+        $projects = new LengthAwarePaginator(
+            $currentItems,
+            $projects->count(),
+            $perPage,
+            $currentPage,
+            ['path' => Paginator::resolveCurrentPath()]
+        );
 
         return view('projectList', compact('projects'));
     }
+
 
     public function projectFilter(Request $request)
     {
@@ -167,7 +235,7 @@ class WebController extends Controller
         }
 
         // Store project details
-        Projectdetail::create([
+        $projectDetail = Projectdetail::create([
             'project_id' => $project->id,
             'title' => $request->title,
             'total_price' => $request->total_price,
@@ -179,6 +247,12 @@ class WebController extends Controller
             'duration' => $request->duration,
             'return_amount' => $request->return_amount
         ]);
+
+        // ✅ Attach details to the project object
+        $project->setRelation('details', collect([$projectDetail]));
+
+        // ✅ Add the new project to the existing cache
+        $this->projectRepository->newProjectCache($project);
 
         return redirect()->back()->with('success', 'Project created successfully.');
 
@@ -225,20 +299,75 @@ class WebController extends Controller
         if ($request->hasFile('image')) {
             $projectDetail->save();
         }
+        $this->projectRepository->refreshProjectCache($id);
 
         return redirect()->route('projects')->with('success', 'Project updated successfully');
     }
 
 
+    // public function projectPeople($id)
+    // {
+    //     $project = Project::with('details')->findOrFail($id);
+    //     $bookings = Booking::with('investor.project.details')->where('project_id', $id)->get();
+    //     $agents = Projectagent::with('user')->where('project_id', $id)->get();
+    //     $agentList = User::where('level', 300)->get();
+    //     $investorList = User::where('level', 200)->get();
+    //     return view('projectPeople', compact('investorList', 'bookings', 'agents', 'agentList', 'project'));
+    // }
+
     public function projectPeople($id)
     {
-        $project = Project::with('details')->findOrFail($id);
+        // Fetch cached data
+        $project = $this->projectRepository->cacheProject($id);
         $bookings = Booking::with('investor.project.details')->where('project_id', $id)->get();
         $agents = Projectagent::with('user')->where('project_id', $id)->get();
         $agentList = User::where('level', 300)->get();
         $investorList = User::where('level', 200)->get();
-        return view('projectPeople', compact('investorList', 'bookings', 'agents', 'agentList', 'project'));
+
+
+        return view('projectPeople', compact('project', 'bookings', 'agents', 'agentList', 'investorList'));
     }
+
+    // public function projectPeople($id)
+    // {
+    //     // Cache the project details
+    //     $project = Cache::remember("project_{$id}", 60, function () use ($id) {
+    //         return Project::with('details')->findOrFail($id);
+    //     });
+
+    //     // Cache the bookings related to the project
+    //     $bookings = Cache::remember("bookings_project_{$id}", 60, function () use ($id) {
+    //         return Booking::with('investor.project.details')->where('project_id', $id)->get();
+    //     });
+
+    //     // Cache the agents related to the project
+    //     $agents = Cache::remember("agents_project_{$id}", 60, function () use ($id) {
+    //         return Projectagent::with('user')->where('project_id', $id)->get();
+    //     });
+
+    //     // Cache the agent list
+    //     $agentList = Cache::remember("agent_list_project_{$id}", 60, function () {
+    //         return User::where('level', 300)->get();
+    //     });
+
+    //     // Cache the investor list
+    //     $investorList = Cache::remember("investor_list_project_{$id}", 60, function () {
+    //         return User::where('level', 200)->get();
+    //     });
+
+    //     // Debugging cached data using Cache::get()
+    //     $cachedProject = Cache::get("project_{$id}");
+    //     $cachedBookings = Cache::get("bookings_project_{$id}");
+    //     $cachedAgents = Cache::get("agents_project_{$id}");
+    //     $cachedAgentList = Cache::get("agent_list_project_{$id}");
+    //     $cachedInvestorList = Cache::get("investor_list_project_{$id}");
+
+    //     // You can dump the cache data to check
+    //     dd($cachedProject, $cachedBookings, $cachedAgents, $cachedAgentList, $cachedInvestorList);
+
+    //     return view('projectPeople', compact('investorList', 'bookings', 'agents', 'agentList', 'project'));
+    // }
+
 
     public function assignAgent()
     {
@@ -279,7 +408,7 @@ class WebController extends Controller
 
     public function agents()
     {
-        $agents = User::where('level', 300)->get();
+        $agents = $this->userRepository->getAllCachedAgents();
 
         return view('agent.index', compact('agents'));
     }
@@ -311,6 +440,8 @@ class WebController extends Controller
         $user->update([
             'unique_id' => 'MKAG' . str_pad($user->id, 2, '0', STR_PAD_LEFT),
         ]);
+        // ✅ Add the new project to the existing cache
+        $this->userRepository->newAgentCache($user);
 
         return redirect()->back()->with('success', 'Agent added successfully.');
     }
@@ -496,7 +627,29 @@ class WebController extends Controller
 
 
 
+    public function getCacheSize()
+    {
+        // Get all cached keys
+        $cacheKeys = ['all_projects','agents']; // Add more keys if needed
 
+        $totalSize = 0;
+        $cacheData = [];
+
+        foreach ($cacheKeys as $key) {
+            if (Cache::has($key)) {
+                $cachedItem = Cache::get($key);
+                $size = mb_strlen(serialize($cachedItem), '8bit'); // Get size in bytes
+                $totalSize += $size;
+                $cacheData[$key] = $size . ' bytes';
+            }
+        }
+
+        return response()->json([
+            'total_size_bytes' => $totalSize,
+            'total_size_kb' => round($totalSize / 1024, 2) . ' KB',
+            'cached_items' => $cacheData,
+        ]);
+    }
 
 
 

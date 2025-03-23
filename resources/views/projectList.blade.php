@@ -77,10 +77,13 @@
                 @foreach($projects as $project)
                     <div class="col-md-6 col-lg-4">
                         <div class="card mb-4 wow fadeInUp" data-wow-duration="1500ms">
-                            <div class="card-img-top">
+                        <div class="card-img-top">
                                 <img src="{{ asset('uploads/projects/' . $project->details->image) }}"
-                                    alt="{{ $project->details->title }}" class="img-fluid" style="height: 200px;">
+                                    alt="{{ $project->details->title }}"
+                                    class="img-fluid"
+                                    style="width: 325; height: 200px; object-fit: cover;">
                             </div>
+
                             <div class="card-body">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <ul class="list-unstyled mb-0">

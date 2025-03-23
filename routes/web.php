@@ -18,6 +18,10 @@ Route::get('', function () {
     return view('login');
 })->name('login');
 
+Route::get('/cache-refresh', [WebController::class, 'refreshProjectCache']);
+Route::get('/cache-size', [WebController::class, 'getCacheSize']);
+
+
 Route::post('/user-login', [WebController::class, 'userLogin'])->name('userLogin');
 
 Route::middleware(['auth', 'preventBackAfterLogout'])->group(function () {

@@ -44,7 +44,7 @@ class InvestorController extends Controller
             ], 401);
         }
         // Fetch the project with the 'details' relationship using eager loading
-        $details = Project::with('details','cart')->find($id);
+        $details = Project::with('details')->find($id);
 
         // Check if the project exists
         if (!$details) {
