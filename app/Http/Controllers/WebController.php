@@ -321,7 +321,7 @@ class WebController extends Controller
         $project = $this->projectRepository->cacheProject($id);
         $bookings = Booking::with('investor.project.details')->where('project_id', $id)->get();
         $agents = Projectagent::with('user')->where('project_id', $id)->get();
-        $agentList = User::where('level', 300)->get();
+        $agentList = $this->userRepository->getAllCachedAgents();
         $investorList = User::where('level', 200)->get();
 
 
