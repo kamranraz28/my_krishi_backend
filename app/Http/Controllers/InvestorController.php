@@ -21,11 +21,12 @@ use Illuminate\Http\Request;
 
 class InvestorController extends Controller
 {
-    //
+    // Fetch the list of all projects for the authenticated investor
     public function projectList()
     {
         $user = Auth::user();
 
+        // Ensure the user has the required access level
         if ($user->level !== 200) {
             return response()->json([
                 'status' => 'error',
@@ -33,25 +34,31 @@ class InvestorController extends Controller
             ], 401);
         }
 
+        // Fetch all projects with their details
         $projects = Project::with('details')->get();
 
+        // Return the list of projects as a JSON response
         return response()->json([
             'status' => 'success',
-            'message' => 'projects showing successfull.',
+            'message' => 'Projects retrieved successfully.',
             'project' => ProjectResource::collection($projects)
         ], 200);
     }
+
+    // Fetch the details of a specific project
     public function projectDetails($id)
     {
         $user = Auth::user();
 
+        // Ensure the user has the required access level
         if ($user->level !== 200) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'You are not eligible to do this.'
             ], 401);
         }
-        // Fetch the project with the 'details' relationship using eager loading
+
+        // Fetch the project with its details
         $details = Project::with('details')->find($id);
 
         // Check if the project exists
@@ -62,7 +69,7 @@ class InvestorController extends Controller
             ], 404);
         }
 
-        // Return the response with the project details
+        // Return the project details as a JSON response
         return response()->json([
             'status' => 'success',
             'message' => 'Project details retrieved successfully.',
@@ -70,39 +77,12 @@ class InvestorController extends Controller
         ], 200);
     }
 
-    public function projectBooking($id)
-    {
-        $user = Auth::user();
-
-        if ($user->level !== 200) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'You are not eligible to do this.'
-            ], 401);
-        }
-        // Fetch the project with the 'details' relationship using eager loading
-        $details = Project::with('details')->find($id);
-
-        // Check if the project exists
-        if (!$details) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Project not found.',
-            ], 404);
-        }
-
-        // Return the response with the project details
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Project details retrieved successfully.',
-            'project' => new ProjectResource($details)
-        ], 200);
-    }
-
+    // Add a project to the investor's cart
     public function addToCart(Request $request, $id)
     {
         $user = Auth::user();
 
+        // Ensure the user has the required access level
         if ($user->level !== 200) {
             return response()->json([
                 'status' => 'error',
@@ -111,12 +91,14 @@ class InvestorController extends Controller
         }
 
         try {
+            // Add the project to the cart
             Cart::create([
                 'project_id' => $id,
                 'investor_id' => $user->id,
                 'unit' => $request->total_unit
             ]);
         } catch (\Exception $e) {
+            // Log the error and return a failure response
             \Log::error('Add To Cart failed: ' . $e->getMessage());
             return response()->json([
                 'status' => 'error',
@@ -124,17 +106,19 @@ class InvestorController extends Controller
             ], 500);
         }
 
+        // Return a success response
         return response()->json([
             'status' => 'success',
-            'message' => 'Add to cart Successfull.'
+            'message' => 'Added to cart successfully.'
         ], 200);
-
     }
 
+    // Fetch the list of all items in the investor's cart
     public function cartList()
     {
         $user = Auth::user();
 
+        // Ensure the user has the required access level
         if ($user->level !== 200) {
             return response()->json([
                 'status' => 'error',
@@ -142,19 +126,23 @@ class InvestorController extends Controller
             ], 401);
         }
 
+        // Fetch all cart items with project details
         $carts = Cart::with('project.details')->where('investor_id', $user->id)->get();
 
+        // Return the cart items as a JSON response
         return response()->json([
             'status' => 'success',
-            'message' => 'Showing all carts',
+            'message' => 'Showing all carts.',
             'carts' => CartResource::collection($carts)
         ], 200);
     }
 
+    // Confirm the cart and create bookings for the projects
     public function cartConfirm(Request $request)
     {
         $user = Auth::user();
 
+        // Ensure the user has the required access level
         if ($user->level !== 200) {
             return response()->json([
                 'status' => 'error',
@@ -162,9 +150,10 @@ class InvestorController extends Controller
             ], 401);
         }
 
-        $projects = $request->project_id;
-        $units = $request->unit;
+        $projects = $request->project_id; // Array of project IDs
+        $units = $request->unit; // Array of units for each project
 
+        // Create bookings for each project in the cart
         foreach ($projects as $key => $project) {
             Booking::create([
                 'project_id' => $project,
@@ -172,19 +161,23 @@ class InvestorController extends Controller
                 'total_unit' => $units[$key]
             ]);
         }
-        // Delete the user's cart after booking
+
+        // Clear the cart after confirming the bookings
         Cart::where('investor_id', $user->id)->delete();
 
+        // Return a success response
         return response()->json([
             'status' => 'success',
-            'message' => 'Booking successfull'
+            'message' => 'Booking successful.'
         ], 200);
     }
 
+    // Remove specific items from the cart
     public function removeFromCart(Request $request)
     {
         $user = Auth::user();
 
+        // Ensure the user has the required access level
         if ($user->level !== 200) {
             return response()->json([
                 'status' => 'error',
@@ -192,9 +185,9 @@ class InvestorController extends Controller
             ], 401);
         }
 
-        $ids = $request->cart_id;
+        $ids = $request->cart_id; // Array of cart item IDs to remove
 
-        // Ensure $ids is an array
+        // Validate the input
         if (!is_array($ids) || empty($ids)) {
             return response()->json([
                 'status' => 'error',
@@ -202,78 +195,22 @@ class InvestorController extends Controller
             ], 400);
         }
 
-        // Delete the retrieved carts
+        // Remove the specified cart items
         Cart::whereIn('id', $ids)->delete();
 
+        // Return a success response
         return response()->json([
             'status' => 'success',
             'message' => 'Carts removed successfully.'
         ], 200);
     }
 
-
-    public function cartEdit($id)
-    {
-        $user = Auth::user();
-
-        if ($user->level !== 200) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'You are not eligible to do this.'
-            ], 401);
-        }
-
-        $cart = Cart::with('project.details')->find($id);
-
-        if (!$cart) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Cart not found.'
-            ], 404);
-        }
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Showing cart',
-            'cart' => new CartResource($cart)
-        ], 200);
-    }
-
-    public function cartUpdate(Request $request, $id)
-    {
-        $user = Auth::user();
-
-        if ($user->level !== 200) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'You are not eligible to do this.'
-            ], 401);
-        }
-
-        $cart = Cart::find($id);
-
-        if (!$cart) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Cart not found.'
-            ], 404);
-        }
-
-        $cart->update([
-            'unit' => $request->unit
-        ]);
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Cart updated successfully.',
-            'cart' => new CartResource($cart)
-        ], 200);
-    }
-
+    // Fetch the list of all bookings for the investor
     public function myBookings()
     {
         $user = Auth::user();
 
+        // Ensure the user has the required access level
         if ($user->level !== 200) {
             return response()->json([
                 'status' => 'error',
@@ -281,90 +218,39 @@ class InvestorController extends Controller
             ], 401);
         }
 
+        // Fetch all bookings with project details
         $bookings = Booking::with('project.details')->where('investor_id', $user->id)->get();
 
+        // Return the bookings as a JSON response
         return response()->json([
             'status' => 'success',
-            'message' => 'Showing all bookings',
+            'message' => 'Showing all bookings.',
             'bookings' => BookingResource::collection($bookings)
         ], 200);
-
     }
 
-    // public function projectUpdate($id)
-    // {
-    //     // Fetch project updates with comments, replies, users, and reactions
-    //     $projectUpdates = Projectupdate::with([
-    //         'user',
-    //         'comment.user',
-    //         'comment.reply.user',
-    //     ])->where('project_id', $id)->get();
-
-    //     // Transform the project updates
-    //     $projectUpdates->transform(function ($update) {
-    //         // Decode JSON images
-    //         $images = json_decode($update->image, true) ?? [];
-    //         $update->image_urls = array_map(fn($path) => url($path), $images);
-
-    //         // Attach reaction summary for update
-    //         $update->reaction_summary = $update->reactions()
-    //             ->selectRaw('type, COUNT(*) as count')
-    //             ->groupBy('type')
-    //             ->pluck('count', 'type');
-
-    //         // Transform comments
-    //         $update->comment->transform(function ($comment) {
-    //             // Attach reaction summary for comments
-    //             $comment->reaction_summary = $comment->reactions()
-    //                 ->selectRaw('type, COUNT(*) as count')
-    //                 ->groupBy('type')
-    //                 ->pluck('count', 'type');
-
-    //             // Transform replies
-    //             $comment->reply->transform(function ($reply) {
-    //                 // Attach reaction summary for replies
-    //                 $reply->reaction_summary = $reply->reactions()
-    //                     ->selectRaw('type, COUNT(*) as count')
-    //                     ->groupBy('type')
-    //                     ->pluck('count', 'type');
-
-    //                 return $reply;
-    //             });
-
-    //             return $comment;
-    //         });
-
-    //         return $update;
-    //     });
-
-    //     // Return the response with the updated project updates
-    //     return response()->json([
-    //         'status' => 'success',
-    //         'message' => 'Showing all updates',
-    //         'updates' => $projectUpdates
-    //     ], 200);
-    // }
-
+    // Fetch all updates for a specific project
     public function projectUpdate($id)
     {
-        // Fetch project updates with comments, replies, and users
+        // Fetch project updates along with related comments, replies, and users
         $projectUpdates = Projectupdate::with([
             'user',
             'comment.user',
             'comment.reply.user',
         ])->where('project_id', $id)->get();
 
-        // Transform the project updates
+        // Transform the updates to include full image URLs
         $projectUpdates->transform(function ($update) {
             // Decode JSON images (stored as a JSON string in the database)
             $images = json_decode($update->image, true) ?? [];
 
+            // Generate full URLs for the images
             $update->image_urls = array_map(fn($path) => url($path), $images);
 
             return $update;
         });
 
-        // Return the response with the updated project updates
+        // Return the transformed updates as a JSON response
         return response()->json([
             'status' => 'success',
             'message' => 'Showing all updates',
@@ -372,51 +258,52 @@ class InvestorController extends Controller
         ], 200);
     }
 
-
-
-
-
-
+    // Add a comment to a specific project update
     public function comment(Request $request, $id)
     {
         $user = Auth::user();
 
+        // Create a new comment
         $comment = Comment::create([
             'projectupdate_id' => $id,
             'comment_by' => $user->id,
             'comment' => $request->comment
         ]);
 
+        // Return the created comment as a JSON response
         return response()->json([
             'status' => 'success',
-            'message' => 'Comment successfull',
+            'message' => 'Comment added successfully.',
             'comment' => new CommentResource($comment)
         ], 200);
-
     }
 
+    // Add a reply to a specific comment
     public function reply(Request $request, $id)
     {
         $user = Auth::user();
 
+        // Create a new reply
         $reply = Reply::create([
             'comment_id' => $id,
             'replied_by' => $user->id,
             'reply' => $request->reply
         ]);
 
+        // Return the created reply as a JSON response
         return response()->json([
             'status' => 'success',
-            'message' => 'Reply successfull',
+            'message' => 'Reply added successfully.',
             'reply' => new ReplyResource($reply)
         ], 200);
     }
 
+    // Update the profile of a specific user
     public function profileUpdate(Request $request, $id)
     {
-
         $user = User::find($id);
 
+        // Check if the user exists
         if (!$user) {
             return response()->json([
                 'status' => 'error',
@@ -424,15 +311,14 @@ class InvestorController extends Controller
             ], 404);
         }
 
+        // Update the user's profile with the provided data
         $user->update($request->all());
 
+        // Return the updated user profile as a JSON response
         return response()->json([
             'status' => 'success',
             'message' => 'Profile updated successfully.',
             'user' => new UserResource($user)
         ], 200);
     }
-
-
-
 }
