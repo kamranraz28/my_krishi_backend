@@ -509,19 +509,23 @@ class WebController extends Controller
         $request->validate([
             'reason' => 'required|array',
             'cost' => 'required|array',
+            'voucher' => 'required|array',
             'reason.*' => 'string|max:255',
             'cost.*' => 'numeric|min:0',
+            'voucher.*' => 'numeric',
         ]);
 
         $costFields = $request->reason;
         $costValues = $request->cost;
-        //dd($costFields, $costValues);
+        $costVouchers = $request->voucher;
+        //dd($costFields, $costValues, $costVouchers);
 
         foreach ($costFields as $index => $field) {
             Projectcost::create([
                 'project_id' => $request->project_id,
                 'field' => $field,
                 'cost' => $costValues[$index] ?? 0,
+                'voucher' => $costVouchers[$index] ?? null,
             ]);
         }
 

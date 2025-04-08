@@ -14,6 +14,7 @@ class Projectcost extends Model
         'field',
         'cost',
         'memo',
+        'voucher',
     ];
 
     public function project()

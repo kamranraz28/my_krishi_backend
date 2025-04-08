@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
@@ -33,7 +34,7 @@ class AuthController extends Controller
             'status' => 'success',
             'message' => 'User logged in successfully',
             'token' => $token,
-            'user' => $user
+            'user' => new UserResource($user)
         ]);
     }
 
@@ -59,20 +60,22 @@ class AuthController extends Controller
         $otp = random_int(100000, 999999);
         $hashedOtp = Hash::make($otp);
 
-        // Update or create the user
-        $user = User::updateOrCreate(
-            ['phone' => $request->phone], // Search by phone
-            ['password' => $hashedOtp, 'level' => 200] // Update or create
-        );
+        // Check if the phone number is already registered
+        $user = User::where('phone', $request->phone)->first();
 
-        // If the user is newly created, assign a unique_id
-        if (!$user->wasRecentlyCreated) {
-            // Only update unique_id if it's NULL (i.e., not assigned before)
-            if (empty($user->unique_id)) {
-                $user->update([
-                    'unique_id' => 'MKIN' . str_pad($user->id, 2, '0', STR_PAD_LEFT),
-                ]);
-            }
+        if ($user) {
+            $user->update(['password' => $hashedOtp]);
+        } else {
+            // Create a new user with the hashed OTP
+            $user = User::create([
+                'phone' => $request->phone,
+                'password' => $hashedOtp,
+                'level' => 200,
+            ]);
+
+            $user->update([
+                'unique_id' => 'MKIN' . str_pad($user->id, 2, '0', STR_PAD_LEFT),
+            ]);
         }
 
         // Dispatch the OTP event
@@ -84,6 +87,7 @@ class AuthController extends Controller
             'phone' => $request->phone
         ], 200);
     }
+
 
 
     public function verifyOtp(Request $request)
@@ -108,7 +112,7 @@ class AuthController extends Controller
             'status' => 'success',
             'message' => 'OTP verified successfully',
             'token' => $token,
-            'user' => $user
+            'user' => new UserResource($user)
         ]);
     }
 

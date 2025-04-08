@@ -2,6 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\AgentResource;
+use App\Http\Resources\CommentResource;
+use App\Http\Resources\ProjectUpdateResource;
+use App\Http\Resources\ReplyResource;
 use App\Models\Comment;
 use App\Models\Projectagent;
 use App\Models\Projectupdate;
@@ -11,11 +15,12 @@ use Illuminate\Http\Request;
 
 class AgentController extends Controller
 {
-    //
+    // Fetch the list of projects assigned to the authenticated agent
     public function projectList()
     {
         $user = Auth::user();
 
+        // Check if the user has the required access level
         if ($user->level !== 300) {
             return response()->json([
                 'status' => 'error',
@@ -23,21 +28,24 @@ class AgentController extends Controller
             ], 401);
         }
 
+        // Fetch projects assigned to the agent with related details
         $projects = Projectagent::with('project.details')->where('agent_id', $user->id)->get();
 
+        // Return the list of projects as a JSON response
         return response()->json([
             'status' => 'success',
             'message' => 'projects are showing',
-            'projects' => $projects
+            'projects' => AgentResource::collection($projects)
         ]);
     }
 
+    // Store a project update with multiple image uploads
     public function projectUpdateStore(Request $request, $id)
     {
         $user = Auth::user();
         $fileNames = []; // Array to store multiple image paths
 
-        // Check if any file is received
+        // Check if any file is received in the request
         if (!$request->hasFile('image')) {
             \Log::error('No files received in request.');
             return response()->json([
@@ -47,8 +55,10 @@ class AgentController extends Controller
         }
 
         try {
+            // Process each uploaded file
             foreach ($request->file('image') as $file) {
                 if ($file->isValid()) {
+                    // Generate a unique file name and move the file to the uploads directory
                     $fileName = $id . '_' . time() . '_' . $file->getClientOriginalName();
                     $file->move(public_path('uploads/projectUpdates'), $fileName);
                     $fileNames[] = 'uploads/projectUpdates/' . $fileName;
@@ -57,6 +67,7 @@ class AgentController extends Controller
                 }
             }
         } catch (\Exception $e) {
+            // Log and return an error response if file upload fails
             \Log::error('File upload failed: ' . $e->getMessage());
             return response()->json([
                 'status' => 'error',
@@ -64,7 +75,7 @@ class AgentController extends Controller
             ], 500);
         }
 
-        // If no images were processed successfully
+        // If no valid images were uploaded
         if (empty($fileNames)) {
             \Log::error('No valid images were saved.');
             return response()->json([
@@ -73,83 +84,87 @@ class AgentController extends Controller
             ], 400);
         }
 
-        // Store multiple image paths as JSON
+        // Store the project update with image paths and description
         Projectupdate::create([
             'project_id' => $id,
             'update_by' => $user->id,
-            'image' => json_encode($fileNames),
+            'image' => json_encode($fileNames), // Store image paths as JSON
             'description' => $request->description,
         ]);
 
+        // Return a success response
         return response()->json([
             'status' => 'success',
             'message' => 'Project update stored successfully.',
-            'uploaded_images' => $fileNames
         ]);
     }
 
+    // Fetch all updates for a specific project
     public function projectUpdate($id)
     {
-        // Fetch project updates for the given project ID
-    // Fetch project updates with comments, replies, users, and reactions
-    $projectUpdates = Projectupdate::with([
-        'user',
-        'comment.user',
-        'comment.reply.user',
-    ])->where('project_id', $id)->get();
-        // Transform the project updates to format images correctly
+        // Fetch project updates along with related comments, replies, and users
+        $projectUpdates = Projectupdate::with([
+            'user',
+            'comment.user',
+            'comment.reply.user',
+        ])->where('project_id', $id)->get();
+
+        // Transform the updates to include full image URLs
         $projectUpdates->transform(function ($update) {
-            // Decode JSON images
+            // Decode JSON images (stored as a JSON string in the database)
             $images = json_decode($update->image, true) ?? [];
 
-            // Generate full URLs for images
+            // Generate full URLs for the images
             $update->image_urls = array_map(fn($path) => url($path), $images);
 
             return $update;
         });
 
-        // Return the response with the updated project updates
+        // Return the transformed updates as a JSON response
         return response()->json([
             'status' => 'success',
             'message' => 'Showing all updates',
-            'updates' => $projectUpdates
+            'updates' => ProjectUpdateResource::collection($projectUpdates)
         ], 200);
     }
 
+    // Add a comment to a specific project update
     public function comment(Request $request, $id)
     {
         $user = Auth::user();
 
+        // Create a new comment for the project update
         $comment = Comment::create([
             'projectupdate_id' => $id,
             'comment_by' => $user->id,
             'comment' => $request->comment
         ]);
 
+        // Return the created comment as a JSON response
         return response()->json([
             'status' => 'success',
             'message' => 'Comment successfull',
-            'bookings' => $comment
-        ],200);
-
+            'bookings' => new CommentResource($comment)
+        ], 200);
     }
 
+    // Add a reply to a specific comment
     public function reply(Request $request, $id)
     {
         $user = Auth::user();
 
-        $reply= Reply::create([
+        // Create a new reply for the comment
+        $reply = Reply::create([
             'comment_id' => $id,
             'replied_by' => $user->id,
             'reply' => $request->reply
         ]);
 
+        // Return the created reply as a JSON response
         return response()->json([
             'status' => 'success',
             'message' => 'Reply successfull',
-            'reply' => $reply
-        ],200);
+            'reply' => new ReplyResource($reply)
+        ], 200);
     }
-
-
 }

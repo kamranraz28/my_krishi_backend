@@ -2,12 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\BookingResource;
+use App\Http\Resources\CartResource;
+use App\Http\Resources\CommentResource;
+use App\Http\Resources\ProjectResource;
+use App\Http\Resources\ProjectUpdateResource;
+use App\Http\Resources\ReplyResource;
+use App\Http\Resources\UserResource;
 use App\Models\Booking;
 use App\Models\Cart;
 use App\Models\Comment;
 use App\Models\Project;
 use App\Models\Projectupdate;
 use App\Models\Reply;
+use App\Models\User;
 use Auth;
 use Illuminate\Http\Request;
 
@@ -25,12 +33,12 @@ class InvestorController extends Controller
             ], 401);
         }
 
-        $projects = Project::with('details','cart')->get();
+        $projects = Project::with('details')->get();
 
         return response()->json([
             'status' => 'success',
             'message' => 'projects showing successfull.',
-            'project' => $projects
+            'project' => ProjectResource::collection($projects)
         ], 200);
     }
     public function projectDetails($id)
@@ -58,7 +66,7 @@ class InvestorController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Project details retrieved successfully.',
-            'project' => $details
+            'project' => new ProjectResource($details)
         ], 200);
     }
 
@@ -87,7 +95,7 @@ class InvestorController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Project details retrieved successfully.',
-            'project' => $details
+            'project' => new ProjectResource($details)
         ], 200);
     }
 
@@ -139,8 +147,8 @@ class InvestorController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Showing all carts',
-            'carts' => $carts
-        ],200);
+            'carts' => CartResource::collection($carts)
+        ], 200);
     }
 
     public function cartConfirm(Request $request)
@@ -170,7 +178,7 @@ class InvestorController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Booking successfull'
-        ],200);
+        ], 200);
     }
 
     public function removeFromCart(Request $request)
@@ -227,8 +235,8 @@ class InvestorController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Showing cart',
-            'cart' => $cart
-        ],200);
+            'cart' => new CartResource($cart)
+        ], 200);
     }
 
     public function cartUpdate(Request $request, $id)
@@ -258,7 +266,7 @@ class InvestorController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Cart updated successfully.',
-            'cart' => $cart
+            'cart' => new CartResource($cart)
         ], 200);
     }
 
@@ -273,61 +281,85 @@ class InvestorController extends Controller
             ], 401);
         }
 
-        $bookings = Booking::with('investor', 'project.details')->where('investor_id', $user->id)->get();
+        $bookings = Booking::with('project.details')->where('investor_id', $user->id)->get();
 
         return response()->json([
             'status' => 'success',
             'message' => 'Showing all bookings',
-            'bookings' => $bookings
-        ],200);
+            'bookings' => BookingResource::collection($bookings)
+        ], 200);
 
     }
 
+    // public function projectUpdate($id)
+    // {
+    //     // Fetch project updates with comments, replies, users, and reactions
+    //     $projectUpdates = Projectupdate::with([
+    //         'user',
+    //         'comment.user',
+    //         'comment.reply.user',
+    //     ])->where('project_id', $id)->get();
+
+    //     // Transform the project updates
+    //     $projectUpdates->transform(function ($update) {
+    //         // Decode JSON images
+    //         $images = json_decode($update->image, true) ?? [];
+    //         $update->image_urls = array_map(fn($path) => url($path), $images);
+
+    //         // Attach reaction summary for update
+    //         $update->reaction_summary = $update->reactions()
+    //             ->selectRaw('type, COUNT(*) as count')
+    //             ->groupBy('type')
+    //             ->pluck('count', 'type');
+
+    //         // Transform comments
+    //         $update->comment->transform(function ($comment) {
+    //             // Attach reaction summary for comments
+    //             $comment->reaction_summary = $comment->reactions()
+    //                 ->selectRaw('type, COUNT(*) as count')
+    //                 ->groupBy('type')
+    //                 ->pluck('count', 'type');
+
+    //             // Transform replies
+    //             $comment->reply->transform(function ($reply) {
+    //                 // Attach reaction summary for replies
+    //                 $reply->reaction_summary = $reply->reactions()
+    //                     ->selectRaw('type, COUNT(*) as count')
+    //                     ->groupBy('type')
+    //                     ->pluck('count', 'type');
+
+    //                 return $reply;
+    //             });
+
+    //             return $comment;
+    //         });
+
+    //         return $update;
+    //     });
+
+    //     // Return the response with the updated project updates
+    //     return response()->json([
+    //         'status' => 'success',
+    //         'message' => 'Showing all updates',
+    //         'updates' => $projectUpdates
+    //     ], 200);
+    // }
+
     public function projectUpdate($id)
     {
-        // Fetch project updates with comments, replies, users, and reactions
+        // Fetch project updates with comments, replies, and users
         $projectUpdates = Projectupdate::with([
             'user',
             'comment.user',
             'comment.reply.user',
-            'reactions',  // Fetch reactions for updates
-            'comment.reactions', // Fetch reactions for comments
-            'comment.reply.reactions' // Fetch reactions for replies
         ])->where('project_id', $id)->get();
 
         // Transform the project updates
         $projectUpdates->transform(function ($update) {
-            // Decode JSON images
+            // Decode JSON images (stored as a JSON string in the database)
             $images = json_decode($update->image, true) ?? [];
+
             $update->image_urls = array_map(fn($path) => url($path), $images);
-
-            // Attach reaction summary for update
-            $update->reaction_summary = $update->reactions()
-                ->selectRaw('type, COUNT(*) as count')
-                ->groupBy('type')
-                ->pluck('count', 'type');
-
-            // Transform comments
-            $update->comment->transform(function ($comment) {
-                // Attach reaction summary for comments
-                $comment->reaction_summary = $comment->reactions()
-                    ->selectRaw('type, COUNT(*) as count')
-                    ->groupBy('type')
-                    ->pluck('count', 'type');
-
-                // Transform replies
-                $comment->reply->transform(function ($reply) {
-                    // Attach reaction summary for replies
-                    $reply->reaction_summary = $reply->reactions()
-                        ->selectRaw('type, COUNT(*) as count')
-                        ->groupBy('type')
-                        ->pluck('count', 'type');
-
-                    return $reply;
-                });
-
-                return $comment;
-            });
 
             return $update;
         });
@@ -336,9 +368,12 @@ class InvestorController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Showing all updates',
-            'updates' => $projectUpdates
+            'updates' => ProjectUpdateResource::collection($projectUpdates)
         ], 200);
     }
+
+
+
 
 
 
@@ -355,8 +390,8 @@ class InvestorController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Comment successfull',
-            'bookings' => $comment
-        ],200);
+            'comment' => new CommentResource($comment)
+        ], 200);
 
     }
 
@@ -364,7 +399,7 @@ class InvestorController extends Controller
     {
         $user = Auth::user();
 
-        $reply= Reply::create([
+        $reply = Reply::create([
             'comment_id' => $id,
             'replied_by' => $user->id,
             'reply' => $request->reply
@@ -373,8 +408,29 @@ class InvestorController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Reply successfull',
-            'reply' => $reply
-        ],200);
+            'reply' => new ReplyResource($reply)
+        ], 200);
+    }
+
+    public function profileUpdate(Request $request, $id)
+    {
+
+        $user = User::find($id);
+
+        if (!$user) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'User not found.'
+            ], 404);
+        }
+
+        $user->update($request->all());
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Profile updated successfully.',
+            'user' => new UserResource($user)
+        ], 200);
     }
 
 

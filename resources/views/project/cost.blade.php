@@ -15,13 +15,24 @@
     </section>
 
     <div class="d-flex justify-content-end mb-4">
-        <button class="btn btn-primary me-5" data-bs-toggle="modal" data-bs-target="#createProjectModal">
-            <i class="fas fa-plus"></i> Close Project
-        </button>
+        @if($project->status == 5)
+            <button type="button" class="btn btn-secondary" disabled>
+                <i class="fas fa-lock"></i> Project Closed
+            </button>
+            <a href="{{ route('financeDetails', ['id' => $project->id]) }}" class="btn btn-primary" style="margin-left: 5px;">
+                <i class="fas fa-plus"></i> Financial Details
+            </a>
 
-        <a href="{{ route('financeDetails',['id' => $project->id]) }}" class="btn btn-primary" style="margin-left: 5px;">
-            <i class="fas fa-plus"></i> Financial Details
-        </a>
+        @else
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createProjectModal">
+                <i class="fas fa-lock"></i> Close Project
+            </button>
+            <a href="{{ route('financeDetails', ['id' => $project->id]) }}" class="btn btn-primary"
+                style="margin-left: 5px; pointer-events: none; opacity: 0.5;" tabindex="-1" aria-disabled="true">
+                <i class="fas fa-plus"></i> Financial Details
+            </a>
+        @endif
+
 
     </div>
 
@@ -62,14 +73,19 @@
                                 <input type="hidden" name="project_id" value="{{ $project->id }}">
                                 <div id="field-container">
                                     <div class="row mb-3 field-group">
-                                        <div class="col-md-5">
+                                        <div class="col-md-4">
                                             <input type="text" name="reason[]" class="form-control" placeholder="Cost Field"
                                                 required>
                                         </div>
 
-                                        <div class="col-md-5">
+                                        <div class="col-md-3">
                                             <input type="number" name="cost[]" class="form-control" placeholder="Cost Value"
                                                 required>
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            <input type="number" name="voucher[]" class="form-control"
+                                                placeholder="Voucher Number" required>
                                         </div>
 
                                         <div class="col-md-2">
@@ -105,6 +121,7 @@
                                         <th>#</th>
                                         <th>Cost Field</th>
                                         <th>Cost Value</th>
+                                        <th>Voucher Number</th>
                                         <th>Cost submitted</th>
                                     </tr>
                                 </thead>
@@ -114,6 +131,7 @@
                                             <td>{{ $key + 1 }}</td>
                                             <td>{{ $cost->field ?? ''}}</td>
                                             <td>{{ $cost->cost ?? ''}}</td>
+                                            <td>{{ $cost->voucher ?? 'N/A'}}</td>
                                             <td>{{ $cost->created_at }}</td>
 
                                         </tr>
@@ -178,16 +196,20 @@
                 fieldGroup.classList.add('row', 'mb-3', 'field-group');
 
                 fieldGroup.innerHTML = `
-                            <div class="col-md-5">
-                                <input type="text" name="reason[]" class="form-control" placeholder="Cost Field" required>
-                            </div>
-                            <div class="col-md-5">
-                                <input type="number" name="cost[]" class="form-control" placeholder="Cost Value" required>
-                            </div>
-                            <div class="col-md-2">
-                                <button type="button" class="btn btn-danger remove-field">Remove</button>
-                            </div>
-                        `;
+                                    <div class="col-md-4">
+                                        <input type="text" name="reason[]" class="form-control" placeholder="Cost Field" required>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input type="number" name="cost[]" class="form-control" placeholder="Cost Value" required>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input type="number" name="voucher[]" class="form-control" placeholder="Voucher Number"
+                                            required>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button type="button" class="btn btn-danger remove-field">Remove</button>
+                                    </div>
+                                `;
 
                 fieldContainer.appendChild(fieldGroup);
 
