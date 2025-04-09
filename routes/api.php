@@ -3,6 +3,7 @@
 use App\Http\Controllers\AgentController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\InvestorController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ReactionController;
 use Illuminate\Http\Request;
@@ -22,6 +23,9 @@ Route::get('/projects/{id?}', [ProjectController::class, 'projectDetails']);
 
 Route::post('/otp/send', [AuthController::class, 'sendOtp']);
 Route::post('/otp/verify', [AuthController::class, 'verifyOtp']);
+
+Route::get('/shurjopay/response', [PaymentController::class, 'verifyPayment'])->name('api.shurjopay.response');
+
 
 Route::middleware('auth:api')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
