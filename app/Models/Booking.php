@@ -13,6 +13,8 @@ class Booking extends Model
         'project_id',
         'investor_id',
         'total_unit',
+        'transaction_id',
+        'status',
     ];
 
     public function project()

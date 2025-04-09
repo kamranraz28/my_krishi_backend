@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ab36a0adf8be439f127b56d88039ebb1",
+    "content-hash": "59d4acffb4b9bc661ebf056b9017a7a2",
     "packages": [
         {
             "name": "brick/math",
@@ -645,16 +645,16 @@
         },
         {
             "name": "guzzlehttp/guzzle",
-            "version": "7.9.2",
+            "version": "7.9.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/guzzle/guzzle.git",
-                "reference": "d281ed313b989f213357e3be1a179f02196ac99b"
+                "reference": "7b2f29fe81dc4da0ca0ea7d42107a0845946ea77"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/guzzle/guzzle/zipball/d281ed313b989f213357e3be1a179f02196ac99b",
-                "reference": "d281ed313b989f213357e3be1a179f02196ac99b",
+                "url": "https://api.github.com/repos/guzzle/guzzle/zipball/7b2f29fe81dc4da0ca0ea7d42107a0845946ea77",
+                "reference": "7b2f29fe81dc4da0ca0ea7d42107a0845946ea77",
                 "shasum": ""
             },
             "require": {
@@ -751,7 +751,7 @@
             ],
             "support": {
                 "issues": "https://github.com/guzzle/guzzle/issues",
-                "source": "https://github.com/guzzle/guzzle/tree/7.9.2"
+                "source": "https://github.com/guzzle/guzzle/tree/7.9.3"
             },
             "funding": [
                 {
@@ -767,7 +767,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2024-07-24T11:22:20+00:00"
+            "time": "2025-03-27T13:37:11+00:00"
         },
         {
             "name": "guzzlehttp/promises",
@@ -3662,6 +3662,64 @@
                 }
             ],
             "time": "2025-02-05T13:22:35+00:00"
+        },
+        {
+            "name": "shurjomukhi/shurjopay-plugin-php",
+            "version": "0.1.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/shurjopay-plugins/sp-plugin-php.git",
+                "reference": "c2e19b20b6bc409911f2bcbc92adb76aefa2c337"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/shurjopay-plugins/sp-plugin-php/zipball/c2e19b20b6bc409911f2bcbc92adb76aefa2c337",
+                "reference": "c2e19b20b6bc409911f2bcbc92adb76aefa2c337",
+                "shasum": ""
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "ShurjopayPlugin\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Shurjomukhi Plugin Devs",
+                    "email": "plugindev@shurjomukhi.com.bd"
+                },
+                {
+                    "name": "Md Wali Mosnad Ayshik",
+                    "email": "ayshik.wali@shurjomukhisolutions.com.bd",
+                    "role": "Software Engineer"
+                },
+                {
+                    "name": "Rayhan Khan Ridoy",
+                    "email": "redoy@shurjomukhisolutions.com.bd",
+                    "role": "Software Engineer"
+                }
+            ],
+            "description": "shurjoPay is a online payment gateway and easy payment solution",
+            "keywords": [
+                "codeigniter",
+                "laravel",
+                "payment-gateway",
+                "payments",
+                "php",
+                "shurjomukhi",
+                "shurjopay",
+                "shurjopay-plugin",
+                "symphony"
+            ],
+            "support": {
+                "issues": "https://github.com/shurjopay-plugins/sp-plugin-php/issues",
+                "source": "https://github.com/shurjopay-plugins/sp-plugin-php/tree/v0.1.1"
+            },
+            "time": "2023-01-27T13:15:08+00:00"
         },
         {
             "name": "stella-maris/clock",
