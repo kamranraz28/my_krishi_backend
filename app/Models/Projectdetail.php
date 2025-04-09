@@ -22,6 +22,7 @@ class Projectdetail extends Model
         'return_amount',
         'closing_amount',
         'service_charge',
+        'booked_unit'
     ];
 
     protected $appends = ['image_url'];

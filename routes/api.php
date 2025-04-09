@@ -48,7 +48,9 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/carts/edit/{id?}', [InvestorController::class, 'cartEdit']);
         Route::put('/carts/update/{id?}', [InvestorController::class, 'cartUpdate']);
         Route::post('/carts/remove', [InvestorController::class, 'removeFromCart']);
-        Route::post('/carts/confirm', [InvestorController::class, 'cartConfirm']);
+        Route::post('/booking/payments/online', [InvestorController::class, 'onlinePayment']);
+        Route::post('/booking/payments/office', [InvestorController::class, 'officePayment']);
+        Route::post('/booking/payments/bank', [InvestorController::class, 'bankPayment']);
         Route::get('/projects/my-bookings', [InvestorController::class, 'myBookings']);
         Route::get('/projects/update/{id?}', [InvestorController::class, 'projectUpdate']);
         //comment by Projectupdate id

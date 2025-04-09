@@ -13,6 +13,7 @@ use App\Models\Booking;
 use App\Models\Cart;
 use App\Models\Comment;
 use App\Models\Project;
+use App\Models\Projectdetail;
 use App\Models\Projectupdate;
 use App\Models\Reply;
 use App\Models\User;
@@ -100,6 +101,8 @@ class InvestorController extends Controller
                 'investor_id' => $user->id,
                 'unit' => $request->total_unit
             ]);
+
+
         } catch (\Exception $e) {
             // Log the error and return a failure response
             \Log::error('Add To Cart failed: ' . $e->getMessage());
@@ -236,80 +239,129 @@ class InvestorController extends Controller
 //     }
 // }
 
-public function cartConfirm(Request $request)
-{
-    $user = Auth::user();
+    public function onlinePayment(Request $request)
+    {
+        $user = Auth::user();
 
-    if ($user->level !== 200) {
-        return response()->json([
-            'status' => 'error',
-            'message' => 'You are not eligible to do this.'
-        ], 401);
-    }
+        if ($user->level !== 200) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'You are not eligible to do this.'
+            ], 401);
+        }
 
-    // Step 1: Get Token
-    $authResponse = Http::post('https://sandbox.shurjopayment.com/api/get_token', [
-        'username' => 'sp_sandbox',
-        'password' => 'pyyk97hu&6u6'
-    ]);
-
-    if (!$authResponse->successful()) {
-        Log::error('Shurjopay Authentication failed: ' . $authResponse->body());
-        return response()->json([
-            'status' => 'error',
-            'message' => 'Authentication failed'
-        ], 400);
-    }
-
-    $authData = $authResponse->json();
-    $token = $authData['token'];
-    $store_id = $authData['store_id'] ?? '1';
-
-    // Step 2: Prepare Payment Request
-    $order_id = 'sp' . time(); // Unique Order ID
-    $paymentUrl = 'https://sandbox.shurjopayment.com/api/secret-pay';
-
-
-    $paymentResponse = Http::withToken($token)
-        ->asMultipart()
-        ->post($paymentUrl, [
-            ['name' => 'prefix', 'contents' => 'sp'],
-            ['name' => 'token', 'contents' => $token],
-            // ['name' => 'return_url', 'contents' => 'https://sandbox.shurjopayment.com/response'],
-            ['name' => 'return_url', 'contents' => route('api.shurjopay.response')],
-            ['name' => 'cancel_url', 'contents' => route('api.shurjopay.response')],
-            ['name' => 'store_id', 'contents' => $store_id],
-            ['name' => 'amount', 'contents' => $request->amount], // You can replace with dynamic cart total
-            ['name' => 'order_id', 'contents' => $order_id],
-            ['name' => 'currency', 'contents' => 'BDT'],
-            ['name' => 'customer_name', 'contents' => $user->name],
-            ['name' => 'customer_address', 'contents' => 'Dhaka'],
-            ['name' => 'customer_phone', 'contents' => '01700000000'], // Should be dynamic
-            ['name' => 'customer_city', 'contents' => 'Dhaka'],
-            ['name' => 'customer_post_code', 'contents' => '1212'],
-            ['name' => 'client_ip', 'contents' => $request->ip()],
-            ['name' => 'discount_amount', 'contents' => '10'],
-            ['name' => 'disc_percent', 'contents' => '0'],
-            ['name' => 'customer_email', 'contents' => $user->email],
-            ['name' => 'customer_state', 'contents' => 'Dhaka'],
-            ['name' => 'customer_country', 'contents' => 'BD'],
-            ['name' => 'shipping_address', 'contents' => 'Test Shipping Address'],
-            ['name' => 'shipping_city', 'contents' => 'Test City'],
-            ['name' => 'shipping_country', 'contents' => 'Test Country'],
-            ['name' => 'received_person_name', 'contents' => 'Jon Doe'],
-            ['name' => 'shipping_phone_number', 'contents' => '01700000000'],
-            ['name' => 'value1', 'contents' => 'Order Payment'],
-            ['name' => 'value2', 'contents' => ''],
-            ['name' => 'value3', 'contents' => ''],
-            ['name' => 'value4', 'contents' => ''],
+        // Step 1: Get Token
+        $authResponse = Http::post('https://sandbox.shurjopayment.com/api/get_token', [
+            'username' => 'sp_sandbox',
+            'password' => 'pyyk97hu&6u6'
         ]);
 
-    if ($paymentResponse->successful()) {
-        $paymentData = $paymentResponse->json();
+        if (!$authResponse->successful()) {
+            Log::error('Shurjopay Authentication failed: ' . $authResponse->body());
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Authentication failed'
+            ], 400);
+        }
 
-        // Optionally store the order with `order_id`, `sp_order_id`, etc.
+        $authData = $authResponse->json();
+        $token = $authData['token'];
+        $store_id = $authData['store_id'] ?? '1';
+
+        // Step 2: Prepare Payment Request
+        $order_id = 'sp' . time(); // Unique Order ID
+        $paymentUrl = 'https://sandbox.shurjopayment.com/api/secret-pay';
+
+
+        $paymentResponse = Http::withToken($token)
+            ->asMultipart()
+            ->post($paymentUrl, [
+                ['name' => 'prefix', 'contents' => 'sp'],
+                ['name' => 'token', 'contents' => $token],
+                // ['name' => 'return_url', 'contents' => 'https://sandbox.shurjopayment.com/response'],
+                ['name' => 'return_url', 'contents' => route('api.shurjopay.response')],
+                ['name' => 'cancel_url', 'contents' => route('api.shurjopay.response')],
+                ['name' => 'store_id', 'contents' => $store_id],
+                ['name' => 'amount', 'contents' => $request->amount], // You can replace with dynamic cart total
+                ['name' => 'order_id', 'contents' => $order_id],
+                ['name' => 'currency', 'contents' => 'BDT'],
+                ['name' => 'customer_name', 'contents' => $user->name],
+                ['name' => 'customer_address', 'contents' => 'Dhaka'],
+                ['name' => 'customer_phone', 'contents' => '01700000000'], // Should be dynamic
+                ['name' => 'customer_city', 'contents' => 'Dhaka'],
+                ['name' => 'customer_post_code', 'contents' => '1212'],
+                ['name' => 'client_ip', 'contents' => $request->ip()],
+                ['name' => 'discount_amount', 'contents' => '10'],
+                ['name' => 'disc_percent', 'contents' => '0'],
+                ['name' => 'customer_email', 'contents' => $user->email],
+                ['name' => 'customer_state', 'contents' => 'Dhaka'],
+                ['name' => 'customer_country', 'contents' => 'BD'],
+                ['name' => 'shipping_address', 'contents' => 'Test Shipping Address'],
+                ['name' => 'shipping_city', 'contents' => 'Test City'],
+                ['name' => 'shipping_country', 'contents' => 'Test Country'],
+                ['name' => 'received_person_name', 'contents' => 'Jon Doe'],
+                ['name' => 'shipping_phone_number', 'contents' => '01700000000'],
+                ['name' => 'value1', 'contents' => 'Order Payment'],
+                ['name' => 'value2', 'contents' => ''],
+                ['name' => 'value3', 'contents' => ''],
+                ['name' => 'value4', 'contents' => ''],
+            ]);
+
+        if ($paymentResponse->successful()) {
+            $paymentData = $paymentResponse->json();
+
+            // Optionally store the order with `order_id`, `sp_order_id`, etc.
+            $projects = $request->project_id; // Array of project IDs
+            $units = $request->unit; // Array of units for each project
+
+            // Create bookings for each project in the cart
+            foreach ($projects as $key => $project) {
+                Booking::create([
+                    'project_id' => $project,
+                    'investor_id' => $user->id,
+                    'total_unit' => $units[$key],
+                    'transaction_id' => $paymentData['sp_order_id'],
+                    'status' => 1,
+                    'payment_method' => 1,
+                ]);
+            }
+
+            // Clear the cart after confirming the bookings
+            // Cart::where('investor_id', $user->id)->delete();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Redirect to payment.',
+                // 'checkout_url' => $paymentData['checkout_url'],
+                'shurjopay_response' => $paymentData
+            ], 200);
+        } else {
+            Log::error('Shurjopay Payment Initiation Failed: ' . $paymentResponse->body());
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to initiate payment.'
+            ], 400);
+        }
+    }
+
+
+    public function officePayment(Request $request)
+    {
+        $user = Auth::user();
+
+        if ($user->level !== 200) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'You are not eligible to do this.'
+            ], 401);
+        }
+
         $projects = $request->project_id; // Array of project IDs
         $units = $request->unit; // Array of units for each project
+
+        $now = now();
+        $futureDateTime = $now->addHours(24)->format('Y-m-d H:i:s');
 
         // Create bookings for each project in the cart
         foreach ($projects as $key => $project) {
@@ -317,34 +369,78 @@ public function cartConfirm(Request $request)
                 'project_id' => $project,
                 'investor_id' => $user->id,
                 'total_unit' => $units[$key],
-                'transaction_id' => $paymentData['sp_order_id'],
-                'status' => 1,
+                'status' => 2,
+                'time_to_pay' => $futureDateTime,
+                'payment_method' => 2,
             ]);
+
+            // Increment projectdetail booked_unit
+            Projectdetail::where('project_id', $project)
+            ->increment('booked_unit', $units[$key]);
         }
 
         // Clear the cart after confirming the bookings
-        // Cart::where('investor_id', $user->id)->delete();
+        Cart::where('investor_id', $user->id)->delete();
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Redirect to payment.',
-            // 'checkout_url' => $paymentData['checkout_url'],
-            'shurjopay_response' => $paymentData
+            'message' => 'booking successful with office payment.'
         ], 200);
-    } else {
-        Log::error('Shurjopay Payment Initiation Failed: ' . $paymentResponse->body());
+    }
+
+    public function bankPayment(Request $request)
+    {
+        $user = Auth::user();
+
+        if ($user->level !== 200) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'You are not eligible to do this.'
+            ], 401);
+        }
+
+        $projects = $request->project_id; // Array of project IDs
+        $units = $request->unit; // Array of units for each project
+
+        //Handle file upload (PDF or image)
+        if ($request->hasFile('receipt')) {
+            $file = $request->file('receipt');
+            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('uploads/bank_receipts'), $filename);
+        } else {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Receipt file is required.'
+            ], 422);
+        }
+
+        // Create bookings for each project in the cart
+        foreach ($projects as $key => $project) {
+            Booking::create([
+                'project_id' => $project,
+                'investor_id' => $user->id,
+                'total_unit' => $units[$key],
+                'status' => 2,
+                'bank_receipt' => $filename,
+                'payment_method' => 3,
+            ]);
+
+            // Increment projectdetail booked_unit
+            Projectdetail::where('project_id', $project)
+            ->increment('booked_unit', $units[$key]);
+        }
+
+        // Clear the cart after confirming the bookings
+        Cart::where('investor_id', $user->id)->delete();
 
         return response()->json([
-            'status' => 'error',
-            'message' => 'Failed to initiate payment.'
-        ], 400);
+            'status' => 'success',
+            'message' => 'booking successsful with bank payment.'
+        ], 200);
     }
-}
 
 
-
-
-public function cartEdit($id)
+    public function cartEdit($id)
     {
         $user = Auth::user();
 
@@ -552,4 +648,5 @@ public function cartEdit($id)
             'user' => new UserResource($user)
         ], 200);
     }
+
 }

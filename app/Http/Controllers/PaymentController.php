@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Booking;
 use App\Models\Cart;
+use App\Models\Projectdetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
@@ -53,12 +54,20 @@ class PaymentController extends Controller
 
         if (isset($verifyData[0]['sp_code']) && $verifyData[0]['sp_code'] == '1000') {
 
-            Booking::where('transaction_id', $orderId)->update(['status' => 5]);
+            $bookings = Booking::where('transaction_id', $orderId)->get();
 
-            // Get the user from the booking (if needed)
-            $booking = Booking::where('transaction_id', $orderId)->first();
-            if ($booking) {
-                Cart::where('investor_id', $booking->investor_id)->delete();
+            foreach ($bookings as $booking) {
+                // Update booking status
+                $booking->update(['status' => 5]);
+
+                // Increment projectdetail booked_unit
+                Projectdetail::where('project_id', $booking->project_id)
+                    ->increment('booked_unit', $booking->total_unit);
+            }
+
+            // Clean up cart (optional)
+            if ($bookings->isNotEmpty()) {
+                Cart::where('investor_id', $bookings->first()->investor_id)->delete();
             }
 
             return response()->json([

@@ -22,6 +22,8 @@ class DetailsResource extends JsonResource
             'total_price' => $this->total_price,
             'unit_price' => $this->unit_price,
             'unit' => $this->unit,
+            'booked_unit' => $this->booked_unit,
+            'remaining_unit' => $this->unit - $this->booked_unit,
             'location' => $this->location,
             'description' => $this->description,
             'image_url' => $this->image_url,

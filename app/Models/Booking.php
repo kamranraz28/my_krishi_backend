@@ -15,6 +15,9 @@ class Booking extends Model
         'total_unit',
         'transaction_id',
         'status',
+        'time_to_pay',
+        'bank_receipt',
+        'payment_method'
     ];
 
     public function project()
