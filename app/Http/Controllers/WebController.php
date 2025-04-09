@@ -656,5 +656,69 @@ class WebController extends Controller
     }
 
 
+    public function pendingPayment()
+    {
+        $bookings = Booking::with('investor','project.details')->where('status',2)->where('payment_method',2)->get();
+
+        return view('pendingPayment.office',compact('bookings'));
+    }
+
+    public function confirmOfficePayment($id)
+    {
+        Booking::find($id)->update([
+            'status' => 5
+        ]);
+
+        return redirect()->back()->with('success','Booking confirmed successfully.');
+    }
+
+    public function cancelOfficePayment($id)
+    {
+        $booking = Booking::find($id);
+
+        // Update the booking status
+        $booking->update([
+            'status' => 7
+        ]);
+
+        // Decrement booked units
+        Projectdetail::where('project_id', $booking->project_id)
+            ->decrement('booked_unit', $booking->total_unit);
+
+        return redirect()->back()->with('success', 'Booking canceled successfully.');
+    }
+
+
+    public function bankPendingPayment()
+    {
+        $bookings = Booking::with('investor','project.details')->where('status',2)->where('payment_method',3)->get();
+
+        return view('pendingPayment.bank',compact('bookings'));
+    }
+
+    public function viewBankReceopt($id)
+    {
+        $booking = Booking::find($id);
+
+        if (!$booking || !$booking->bank_receipt) {
+            abort(404, 'Receipt not found.');
+        }
+
+        $path = public_path('uploads/bank_receipts/' . $booking->bank_receipt);
+
+        if (!file_exists($path)) {
+            abort(404, 'File not found.');
+        }
+
+        $mimeType = mime_content_type($path);
+
+        return response()->file($path, [
+            'Content-Type' => $mimeType,
+        ]);
+    }
+
+
+
+
 
 }

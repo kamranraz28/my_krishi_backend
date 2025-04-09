@@ -51,6 +51,10 @@ Route::middleware(['auth', 'preventBackAfterLogout'])->group(function () {
     Route::get('/projects/finance/details/{id?}', [WebController::class, 'financeDetails'])->name('financeDetails');
     Route::get('project/print-finance-details/{id}', [WebController::class, 'printFinanceDetails'])->name('printFinanceDetails');
     Route::post('/react', [WebController::class, 'react'])->name('react');
-
+    Route::get('office-payment/pending', [WebController::class, 'pendingPayment'])->name('officePendingPayment');
+    Route::get('bank-payment/pending', [WebController::class, 'bankPendingPayment'])->name('bankPendingPayment');
+    Route::get('office-payment/confirm/{id?}', [WebController::class, 'confirmOfficePayment'])->name('confirmOfficePayment');
+    Route::get('office-payment/cancel/{id?}', [WebController::class, 'cancelOfficePayment'])->name('cancelOfficePayment');
+    Route::get('bank-receipt/view/{id?}', [WebController::class, 'viewBankReceopt'])->name('viewBankReceopt');
 
 });

@@ -96,6 +96,15 @@ class InvestorController extends Controller
 
         try {
             // Add the project to the cart
+
+            $existingCart = Cart::where('project_id', $id)->where('investor_id', $user->id)->count();
+
+            if($existingCart > 0){
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'this project is already to your cart'
+                ],400);
+            }
             Cart::create([
                 'project_id' => $id,
                 'investor_id' => $user->id,
