@@ -56,5 +56,7 @@ Route::middleware(['auth', 'preventBackAfterLogout'])->group(function () {
     Route::get('office-payment/confirm/{id?}', [WebController::class, 'confirmOfficePayment'])->name('confirmOfficePayment');
     Route::get('office-payment/cancel/{id?}', [WebController::class, 'cancelOfficePayment'])->name('cancelOfficePayment');
     Route::get('bank-receipt/view/{id?}', [WebController::class, 'viewBankReceopt'])->name('viewBankReceopt');
+    Route::get('investors/{id?}/nid/view', [WebController::class, 'viewNid'])->name('viewNid');
+    Route::get('investors/{id?}/blank-check/view', [WebController::class, 'viewCheck'])->name('viewCheck');
 
 });

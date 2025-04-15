@@ -27,6 +27,7 @@ class User extends Authenticatable implements JWTSubject
         'level',
         'unique_id',
         'address',
+        'image',
     ];
 
     /**
@@ -88,6 +89,16 @@ class User extends Authenticatable implements JWTSubject
     public function cart()
     {
         return $this->hasMany(Cart::class, 'investor_id');
+    }
+
+    public function investor()
+    {
+        return $this->hasOne(Investor::class, 'investor_id');
+    }
+
+    public function getImageUrlAttribute()
+    {
+        return url('uploads/investors/' . $this->image);
     }
 
 }

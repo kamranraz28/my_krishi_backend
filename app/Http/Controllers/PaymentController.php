@@ -63,11 +63,14 @@ class PaymentController extends Controller
                 // Increment projectdetail booked_unit
                 Projectdetail::where('project_id', $booking->project_id)
                     ->increment('booked_unit', $booking->total_unit);
+
+                Cart::where('investor_id', $booking->investor_id)->where('project_id', $booking->project_id)->delete();
+
             }
 
             // Clean up cart (optional)
             if ($bookings->isNotEmpty()) {
-                Cart::where('investor_id', $bookings->first()->investor_id)->delete();
+
             }
 
             return response()->json([

@@ -159,7 +159,7 @@
                             <select id="agentSelect" name="agent_id" class="form-control" required>
                                 <option value="">Select an Agent</option>
                                 @foreach($agentList as $agent)
-                                    <option value="{{ $agent->id }}">{{ $agent->name }}</option>
+                                    <option value="{{ $agent->id }}">{{ $agent->name }}-({{ $agent->unique_id }})</option>
                                 @endforeach
                             </select>
                         </div>
@@ -191,13 +191,17 @@
                             <select id="investor_id" name="investor_id" class="form-control" required>
                                 <option value="">Select an Investor</option>
                                 @foreach($investorList as $investor)
-                                    <option value="{{ $investor->id }}">{{ $investor->name }}</option>
+                                    <option value="{{ $investor->user_id }}">{{ $investor->user->name }}-({{ $investor->user->unique_id }})</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="mb-3">
                             <label for="unit" class="form-label">Number of Unit</label>
                             <input type="number" name="unit" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="payment_note" class="form-label">Note</label>
+                            <input type="text" name="payment_note" class="form-control">
                         </div>
                     </div>
                     <div class="modal-footer">

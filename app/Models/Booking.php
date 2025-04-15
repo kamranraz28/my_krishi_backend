@@ -17,7 +17,8 @@ class Booking extends Model
         'status',
         'time_to_pay',
         'bank_receipt',
-        'payment_method'
+        'payment_method',
+        'payment_note',
     ];
 
     public function project()

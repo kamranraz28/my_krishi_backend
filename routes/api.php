@@ -59,6 +59,8 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/projects/reply/{id?}', [InvestorController::class, 'reply']);
         // Route::post('/reaction', [ReactionController::class, 'react']);
         Route::post('/profile/update/{id?}', [InvestorController::class, 'profileUpdate']);
+        Route::get('/banks', [InvestorController::class, 'profileEdit']);
+
     });
 
     Route::group(['prefix' => 'agent'], function () {

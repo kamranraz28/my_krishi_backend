@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 class Project extends Model
 {
@@ -45,6 +46,11 @@ class Project extends Model
     public function cart()
     {
         return $this->hasMany(Cart::class, 'project_id');
+    }
+
+    public static function getProjectList(): Carbon
+    {
+        return Carbon::create(2025, 4, 17);
     }
 
 }

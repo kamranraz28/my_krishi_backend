@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\BankResource;
 use App\Http\Resources\BookingResource;
 use App\Http\Resources\CartResource;
 use App\Http\Resources\CommentResource;
@@ -9,9 +10,11 @@ use App\Http\Resources\ProjectResource;
 use App\Http\Resources\ProjectUpdateResource;
 use App\Http\Resources\ReplyResource;
 use App\Http\Resources\UserResource;
+use App\Models\Bank;
 use App\Models\Booking;
 use App\Models\Cart;
 use App\Models\Comment;
+use App\Models\Investor;
 use App\Models\Project;
 use App\Models\Projectdetail;
 use App\Models\Projectupdate;
@@ -53,7 +56,6 @@ class InvestorController extends Controller
     public function projectDetails($id)
     {
         $user = Auth::user();
-
         // Ensure the user has the required access level
         if ($user->level !== 200) {
             return response()->json([
@@ -99,11 +101,11 @@ class InvestorController extends Controller
 
             $existingCart = Cart::where('project_id', $id)->where('investor_id', $user->id)->count();
 
-            if($existingCart > 0){
+            if ($existingCart > 0) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'this project is already to your cart'
-                ],400);
+                    'message' => 'This project is already to your cart'
+                ], 400);
             }
             Cart::create([
                 'project_id' => $id,
@@ -385,7 +387,7 @@ class InvestorController extends Controller
 
             // Increment projectdetail booked_unit
             Projectdetail::where('project_id', $project)
-            ->increment('booked_unit', $units[$key]);
+                ->increment('booked_unit', $units[$key]);
         }
 
         // Clear the cart after confirming the bookings
@@ -436,7 +438,7 @@ class InvestorController extends Controller
 
             // Increment projectdetail booked_unit
             Projectdetail::where('project_id', $project)
-            ->increment('booked_unit', $units[$key]);
+                ->increment('booked_unit', $units[$key]);
         }
 
         // Clear the cart after confirming the bookings
@@ -634,12 +636,24 @@ class InvestorController extends Controller
         ], 200);
     }
 
+    public function profileEdit()
+    {
+
+        $banks = Bank::all();
+
+        // Return the user profile as a JSON response
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Showing bank details.',
+            'banks' => BankResource::collection($banks),
+        ], 200);
+    }
+
     // Update the profile of a specific user
     public function profileUpdate(Request $request, $id)
     {
         $user = User::find($id);
 
-        // Check if the user exists
         if (!$user) {
             return response()->json([
                 'status' => 'error',
@@ -647,15 +661,60 @@ class InvestorController extends Controller
             ], 404);
         }
 
-        // Update the user's profile with the provided data
-        $user->update($request->all());
+        // Upload profile image
+        $imageFileName = $user->image; // keep old if no new
+        if ($request->hasFile('image')) {
+            $imageFile = $request->file('image');
+            $imageFileName = time() . '_' . $imageFile->getClientOriginalName();
+            $imageFile->move(public_path('uploads/investors'), $imageFileName);
+        }
 
-        // Return the updated user profile as a JSON response
+        // Update user
+        $user->update([
+            'name' => $request->name,
+            'email' => $request->email,
+            'address' => $request->address,
+            'image' => $imageFileName
+        ]);
+
+        // Upload NID
+        $nidFileName = null;
+        if ($request->hasFile('nid_upload')) {
+            $nidFile = $request->file('nid_upload');
+            $nidFileName = time() . '_' . $nidFile->getClientOriginalName();
+            $nidFile->move(public_path('uploads/investors/nid'), $nidFileName);
+        }
+
+        // Upload Check
+        $checkFileName = null;
+        if ($request->hasFile('check_upload')) {
+            $checkFile = $request->file('check_upload');
+            $checkFileName = time() . '_' . $checkFile->getClientOriginalName();
+            $checkFile->move(public_path('uploads/investors/blank_check'), $checkFileName);
+        }
+
+        // Update or Create Investor
+        Investor::updateOrCreate(
+            ['investor_id' => $user->id], // condition
+            [
+                'nid' => $request->nid,
+                'nid_upload' => $nidFileName,
+                'bank_id' => $request->bank_id,
+                'acc_name' => $request->acc_name,
+                'acc_number' => $request->acc_number,
+                'branch_name' => $request->branch_name,
+                'routing_number' => $request->routing_number,
+                'swift_code' => $request->swift_code,
+                'check_upload' => $checkFileName,
+            ]
+        );
+
         return response()->json([
             'status' => 'success',
             'message' => 'Profile updated successfully.',
             'user' => new UserResource($user)
         ], 200);
     }
+
 
 }

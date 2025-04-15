@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Booking;
 use App\Models\Comment;
-use App\Models\Investor;
 use App\Models\Project;
 use App\Models\Projectagent;
 use App\Models\Projectcost;
@@ -26,9 +25,38 @@ use Illuminate\Pagination\Paginator;
 
 class WebController extends Controller
 {
+    //
+    protected $projectRepository;
+    protected $userRepository;
+    public function __construct(ProjectRepository $projectRepository, UserRepository $userRepository)
+    {
+        $this->projectRepository = $projectRepository;
+        $this->userRepository = $userRepository;
+    }
 
+    public function refreshProjectCache()
+    {
+        // Clear existing project cache
+        $this->projectRepository->forgetAllProjectsCache();
+        $this->userRepository->forgetAllAgentsCache();
+
+        // Re-cache all projects
+        $this->projectRepository->cacheAllProjects();
+        $this->userRepository->cacheAgent();
+
+        return response()->json([
+            'message' => 'Project cache refreshed successfully!',
+            'projects' => $this->projectRepository->getAllCachedProjects(),
+            'agents' => $this->userRepository->cacheAgent(),
+        ]);
+    }
     public function userLogin(Request $request)
     {
+        if (!Cache::has('agents')) {
+            $this->userRepository->cacheAgent();
+        }
+
+        //$this->userRepository->debugAgentCache();
 
         $user = User::where('email', $request->email)->first();
 
@@ -92,10 +120,21 @@ class WebController extends Controller
 
     public function projects()
     {
+        // Cache all projects if not already cached
+
+        if (!Cache::has('all_projects')) {
+            $this->projectRepository->cacheAllProjects();
+        }
+
         //$this->projectRepository->debugProjectCache();
         $status = Session::get('status');
 
-        $projects = Project::with('details')->get();
+        // Fetch cached data
+        $projects = $this->projectRepository->getAllCachedProjects();
+
+
+        // Filter and sort the cached data manually
+        $projects = collect($projects);
 
         if ($status) {
             $projects = $projects->where('status', $status);
@@ -209,6 +248,12 @@ class WebController extends Controller
             'return_amount' => $request->return_amount
         ]);
 
+        // ✅ Attach details to the project object
+        $project->setRelation('details', collect([$projectDetail]));
+
+        // ✅ Add the new project to the existing cache
+        $this->projectRepository->newProjectCache($project);
+
         return redirect()->back()->with('success', 'Project created successfully.');
 
     }
@@ -260,16 +305,68 @@ class WebController extends Controller
     }
 
 
+    // public function projectPeople($id)
+    // {
+    //     $project = Project::with('details')->findOrFail($id);
+    //     $bookings = Booking::with('investor.project.details')->where('project_id', $id)->get();
+    //     $agents = Projectagent::with('user')->where('project_id', $id)->get();
+    //     $agentList = User::where('level', 300)->get();
+    //     $investorList = User::where('level', 200)->get();
+    //     return view('projectPeople', compact('investorList', 'bookings', 'agents', 'agentList', 'project'));
+    // }
+
     public function projectPeople($id)
     {
-        $project = Project::with('details')->findOrFail($id);
+        // Fetch cached data
+        $project = $this->projectRepository->cacheProject($id);
         $bookings = Booking::with('investor.project.details')->where('project_id', $id)->get();
         $agents = Projectagent::with('user')->where('project_id', $id)->get();
-        $agentList = User::where('level', 300)->get();
-        $investorList = Investor::with('user')->get();
-        return view('projectPeople', compact('investorList', 'bookings', 'agents', 'agentList', 'project'));
+        $agentList = $this->userRepository->getAllCachedAgents();
+        $investorList = User::where('level', 200)->get();
+
+
+        return view('projectPeople', compact('project', 'bookings', 'agents', 'agentList', 'investorList'));
     }
 
+    // public function projectPeople($id)
+    // {
+    //     // Cache the project details
+    //     $project = Cache::remember("project_{$id}", 60, function () use ($id) {
+    //         return Project::with('details')->findOrFail($id);
+    //     });
+
+    //     // Cache the bookings related to the project
+    //     $bookings = Cache::remember("bookings_project_{$id}", 60, function () use ($id) {
+    //         return Booking::with('investor.project.details')->where('project_id', $id)->get();
+    //     });
+
+    //     // Cache the agents related to the project
+    //     $agents = Cache::remember("agents_project_{$id}", 60, function () use ($id) {
+    //         return Projectagent::with('user')->where('project_id', $id)->get();
+    //     });
+
+    //     // Cache the agent list
+    //     $agentList = Cache::remember("agent_list_project_{$id}", 60, function () {
+    //         return User::where('level', 300)->get();
+    //     });
+
+    //     // Cache the investor list
+    //     $investorList = Cache::remember("investor_list_project_{$id}", 60, function () {
+    //         return User::where('level', 200)->get();
+    //     });
+
+    //     // Debugging cached data using Cache::get()
+    //     $cachedProject = Cache::get("project_{$id}");
+    //     $cachedBookings = Cache::get("bookings_project_{$id}");
+    //     $cachedAgents = Cache::get("agents_project_{$id}");
+    //     $cachedAgentList = Cache::get("agent_list_project_{$id}");
+    //     $cachedInvestorList = Cache::get("investor_list_project_{$id}");
+
+    //     // You can dump the cache data to check
+    //     dd($cachedProject, $cachedBookings, $cachedAgents, $cachedAgentList, $cachedInvestorList);
+
+    //     return view('projectPeople', compact('investorList', 'bookings', 'agents', 'agentList', 'project'));
+    // }
 
 
     public function assignAgent()
@@ -299,29 +396,19 @@ class WebController extends Controller
 
     public function assignInvestor(Request $request)
     {
-        $now = now();
-        $futureDateTime = $now->addHours(24)->format('Y-m-d H:i:s');
 
         Booking::create([
             'project_id' => $request->project_id,
             'investor_id' => $request->investor_id,
             'total_unit' => $request->unit,
-            'status' => 2,
-            'payment_method' => 2,
-            'time_to_pay' => $futureDateTime,
-            'payment_note' => $request->payment_note,
         ]);
 
-        // Increment projectdetail booked_unit
-        Projectdetail::where('project_id', $request->project_id)
-        ->increment('booked_unit', $request->unit);
-
-        return redirect()->back()->with('success', 'Project Booking Successful.');
+        return redirect()->back()->with('success', 'Investor added successfully.');
     }
 
     public function agents()
     {
-        $agents = User::where('level', 300)->get();
+        $agents = $this->userRepository->getAllCachedAgents();
 
         return view('agent.index', compact('agents'));
     }
@@ -353,6 +440,8 @@ class WebController extends Controller
         $user->update([
             'unique_id' => 'MKAG' . str_pad($user->id, 2, '0', STR_PAD_LEFT),
         ]);
+        // ✅ Add the new project to the existing cache
+        $this->userRepository->newAgentCache($user);
 
         return redirect()->back()->with('success', 'Agent added successfully.');
     }
@@ -360,7 +449,7 @@ class WebController extends Controller
 
     public function investors()
     {
-        $investors = User::with('booking.project.details','investor')->where('level', 200)->get();
+        $investors = User::with('booking.project.details')->where('level', 200)->get();
 
         return view('investor.index', compact('investors'));
     }
@@ -379,60 +468,18 @@ class WebController extends Controller
 
     public function investorStore(Request $request)
     {
-        $request->validate([
-            'nid_upload' => 'nullable|file|mimes:jpg,png,pdf|max:2048', // 2MB max
-            'check_upload' => 'nullable|file|mimes:jpg,png,pdf|max:2048', // 2MB max
-            'image' => 'nullable|file|mimes:jpg,png|max:2048', // 2MB max
-        ]);
-
-        //dd($request->all());
-
-        $imageFileName = null;
-        if ($request->hasFile('image')) {
-            $imageFile = $request->file('image');
-            $imageFileName = time() . '_' . $imageFile->getClientOriginalName();
-            $imageFile->move(public_path('uploads/investors'), $imageFileName);
-        }
-
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'address' => $request->address,
             'level' => 200,
             'phone' => $request->phone,
             'password' => Hash::make(12345678),
-            'image' => $imageFileName
         ]);
 
         // Generate unique_id using user ID (e.g., AG01, AG02)
         $user->update([
             'unique_id' => 'MKIN' . str_pad($user->id, 2, '0', STR_PAD_LEFT),
         ]);
-
-        $nidFileName = null;
-        if ($request->hasFile('nid_upload')) {
-            $nidFile = $request->file('nid_upload');
-            $nidFileName = time() . '_' . $nidFile->getClientOriginalName();
-            $nidFile->move(public_path('uploads/investors/nid'), $nidFileName);
-        }
-
-        $checkFileName = null;
-        if ($request->hasFile('check_upload')) {
-            $checkFile = $request->file('check_upload');
-            $checkFileName = time() . '_' . $checkFile->getClientOriginalName();
-            $checkFile->move(public_path('uploads/investors/blank_check'), $checkFileName);
-        }
-
-        // Update or create investor record
-        Investor::updateOrCreate(
-            ['investor_id' => $user->id],
-            [
-                'nid' => $request->nid,
-                'nid_upload' => $nidFileName,
-                'bank_details' => $request->bank_details,
-                'check_upload' => $checkFileName,
-            ]
-        );
 
         return redirect()->back()->with('success', 'Investor added successfully.');
     }
@@ -584,6 +631,31 @@ class WebController extends Controller
 
 
 
+    public function getCacheSize()
+    {
+        // Get all cached keys
+        $cacheKeys = ['all_projects','agents']; // Add more keys if needed
+
+        $totalSize = 0;
+        $cacheData = [];
+
+        foreach ($cacheKeys as $key) {
+            if (Cache::has($key)) {
+                $cachedItem = Cache::get($key);
+                $size = mb_strlen(serialize($cachedItem), '8bit'); // Get size in bytes
+                $totalSize += $size;
+                $cacheData[$key] = $size . ' bytes';
+            }
+        }
+
+        return response()->json([
+            'total_size_bytes' => $totalSize,
+            'total_size_kb' => round($totalSize / 1024, 2) . ' KB',
+            'cached_items' => $cacheData,
+        ]);
+    }
+
+
     public function pendingPayment()
     {
         $bookings = Booking::with('investor','project.details')->where('status',2)->where('payment_method',2)->get();
@@ -645,47 +717,7 @@ class WebController extends Controller
         ]);
     }
 
-    public function viewNid($id)
-    {
-        $investor = Investor::find($id);
 
-        if (!$investor || !$investor->nid_upload) {
-            abort(404, 'Receipt not found.');
-        }
-
-        $path = public_path('uploads/investors/nid/' . $investor->nid_upload);
-
-        if (!file_exists($path)) {
-            abort(404, 'File not found.');
-        }
-
-        $mimeType = mime_content_type($path);
-
-        return response()->file($path, [
-            'Content-Type' => $mimeType,
-        ]);
-    }
-
-    public function viewCheck($id)
-    {
-        $investor = Investor::find($id);
-
-        if (!$investor || !$investor->check_upload) {
-            abort(404, 'Receipt not found.');
-        }
-
-        $path = public_path('uploads/investors/blank_check/' . $investor->check_upload);
-
-        if (!file_exists($path)) {
-            abort(404, 'File not found.');
-        }
-
-        $mimeType = mime_content_type($path);
-
-        return response()->file($path, [
-            'Content-Type' => $mimeType,
-        ]);
-    }
 
 
 
