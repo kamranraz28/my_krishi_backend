@@ -84,10 +84,12 @@
 
                                 <td>
                                     <div class="d-flex gap-2 justify-content-center">
-                                        <a href="{{ route('confirmOfficePayment', $booking->id) }}" class="btn btn-success btn-sm">
+                                        <a href="{{ route('confirmBankPayment', $booking->id) }}"
+                                        onclick="return confirm('Are you sure you want to confirm this booking?')"
+                                        class="btn btn-success btn-sm">
                                             <i class="fas fa-check-circle me-1"></i> Confirm
                                         </a>
-                                        <a href="{{ route('cancelOfficePayment', $booking->id) }}"
+                                        <a href="{{ route('cancelBankPayment', $booking->id) }}"
                                             onclick="return confirm('Are you sure you want to cancel this booking?')"
                                             class="btn btn-outline-danger btn-sm">
                                                 <i class="fas fa-times-circle me-1"></i> Cancel

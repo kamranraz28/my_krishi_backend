@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\BankPaymentConfirm;
 use App\Events\OfficePaymentCancel;
 use App\Events\OfficePaymentConfirm;
 use App\Events\ProjectClosed;
@@ -631,7 +632,7 @@ class WebController extends Controller
 
     public function confirmOfficePayment($id)
     {
-        $booking = Booking::find($id)->with('investor','project.details')->first();
+        $booking = Booking::with('investor', 'project.details')->findOrFail($id);
 
         // Update the booking status
         $booking->update([
@@ -645,7 +646,7 @@ class WebController extends Controller
 
     public function cancelOfficePayment($id)
     {
-        $booking = Booking::find($id)->with('investor','project.details')->first();
+        $booking = Booking::with('investor', 'project.details')->findOrFail($id);
 
         // Update the booking status
         $booking->update([
@@ -689,6 +690,39 @@ class WebController extends Controller
         return response()->file($path, [
             'Content-Type' => $mimeType,
         ]);
+    }
+
+    public function confirmBankPayment($id)
+    {
+        $booking = Booking::with('investor', 'project.details')->findOrFail($id);
+
+        // Update the booking status
+        $booking->update([
+            'status' => 5
+        ]);
+
+        event(new BankPaymentConfirm($booking));
+
+        return redirect()->back()->with('success','Booking confirmed successfully.');
+    }
+
+    public function cancelBankPayment($id)
+    {
+        $booking = Booking::find($id)->with('investor','project.details')->first();
+
+        // Update the booking status
+        $booking->update([
+            'status' => 7
+        ]);
+
+        // Fire the event
+        event(new OfficePaymentCancel($booking));
+
+        // Decrement booked units
+        Projectdetail::where('project_id', $booking->project_id)
+            ->decrement('booked_unit', $booking->total_unit);
+
+        return redirect()->back()->with('success', 'Booking canceled successfully.');
     }
 
     public function viewNid($id)
