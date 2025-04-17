@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\BankPayment;
+use App\Events\OfficePayment;
 use App\Http\Resources\BankResource;
 use App\Http\Resources\BookingResource;
 use App\Http\Resources\CartResource;
@@ -361,6 +363,7 @@ class InvestorController extends Controller
     {
         $user = Auth::user();
 
+        // Check if the user is eligible
         if ($user->level !== 200) {
             return response()->json([
                 'status' => 'error',
@@ -369,14 +372,17 @@ class InvestorController extends Controller
         }
 
         $projects = $request->project_id; // Array of project IDs
-        $units = $request->unit; // Array of units for each project
+        $units = $request->unit;          // Array of units for each project
 
         $now = now();
         $futureDateTime = $now->addHours(24)->format('Y-m-d H:i:s');
 
-        // Create bookings for each project in the cart
+        // Collect all bookings to trigger event later
+        $allBookings = collect();
+
+        // Create bookings for each project
         foreach ($projects as $key => $project) {
-            Booking::create([
+            $bookingInfo = Booking::create([
                 'project_id' => $project,
                 'investor_id' => $user->id,
                 'total_unit' => $units[$key],
@@ -385,19 +391,32 @@ class InvestorController extends Controller
                 'payment_method' => 2,
             ]);
 
+            // Load relationships
+            $bookingInfo->load([
+                'project.details',
+                'investor'
+            ]);
+
             // Increment projectdetail booked_unit
             Projectdetail::where('project_id', $project)
                 ->increment('booked_unit', $units[$key]);
+
+            // Add to booking collection
+            $allBookings->push($bookingInfo);
         }
 
         // Clear the cart after confirming the bookings
         Cart::where('investor_id', $user->id)->delete();
 
+        // Send email notification (fire event with all bookings)
+        event(new OfficePayment($allBookings));
+
         return response()->json([
             'status' => 'success',
-            'message' => 'booking successful with office payment.'
+            'message' => 'Booking successful with office payment.'
         ], 200);
     }
+
 
     public function bankPayment(Request $request)
     {
@@ -425,9 +444,12 @@ class InvestorController extends Controller
             ], 422);
         }
 
+        // Collect all bookings to trigger event later
+        $allBookings = collect();
+
         // Create bookings for each project in the cart
         foreach ($projects as $key => $project) {
-            Booking::create([
+            $bookingInfo = Booking::create([
                 'project_id' => $project,
                 'investor_id' => $user->id,
                 'total_unit' => $units[$key],
@@ -436,13 +458,25 @@ class InvestorController extends Controller
                 'payment_method' => 3,
             ]);
 
+            // Load relationships
+            $bookingInfo->load([
+                'project.details',
+                'investor'
+            ]);
+
             // Increment projectdetail booked_unit
             Projectdetail::where('project_id', $project)
                 ->increment('booked_unit', $units[$key]);
+
+            // Add to booking collection
+            $allBookings->push($bookingInfo);
         }
 
         // Clear the cart after confirming the bookings
         Cart::where('investor_id', $user->id)->delete();
+
+        // Send email notification (fire event with all bookings)
+        event(new BankPayment($allBookings));
 
         return response()->json([
             'status' => 'success',

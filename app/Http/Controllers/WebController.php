@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\OfficePaymentConfirm;
 use App\Events\ProjectClosed;
 use App\Models\Bank;
 use App\Models\Booking;
@@ -629,9 +630,14 @@ class WebController extends Controller
 
     public function confirmOfficePayment($id)
     {
-        Booking::find($id)->update([
+        $booking = Booking::find($id)->with('investor','project.details')->first();
+
+        // Update the booking status
+        $booking->update([
             'status' => 5
         ]);
+
+        event(new OfficePaymentConfirm($booking));
 
         return redirect()->back()->with('success','Booking confirmed successfully.');
     }

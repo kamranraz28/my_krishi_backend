@@ -24,6 +24,15 @@ class EventServiceProvider extends ServiceProvider
         \App\Events\ProjectClosed::class => [
             \App\Listeners\SendProjectClosedEmail::class,
         ],
+        \App\Events\OfficePayment::class => [
+            \App\Listeners\SendOfficePaymentMail::class,
+        ],
+        \App\Events\BankPayment::class => [
+            \App\Listeners\SendBankPaymentMail::class,
+        ],
+        \App\Events\OfficePaymentConfirm::class => [
+            \App\Listeners\SendOfficePaymentConfirmMail::class,
+        ],
     ];
 
     /**
