@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\BankPaymentCancel;
 use App\Events\BankPaymentConfirm;
 use App\Events\OfficePaymentCancel;
 use App\Events\OfficePaymentConfirm;
@@ -708,7 +709,7 @@ class WebController extends Controller
 
     public function cancelBankPayment($id)
     {
-        $booking = Booking::find($id)->with('investor','project.details')->first();
+        $booking = Booking::with('investor', 'project.details')->findOrFail($id);
 
         // Update the booking status
         $booking->update([
@@ -716,7 +717,7 @@ class WebController extends Controller
         ]);
 
         // Fire the event
-        event(new OfficePaymentCancel($booking));
+        event(new BankPaymentCancel($booking));
 
         // Decrement booked units
         Projectdetail::where('project_id', $booking->project_id)
