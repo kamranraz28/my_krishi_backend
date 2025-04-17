@@ -14,7 +14,8 @@ class SendOtpViaSms
         $senderId = config('services.sms.sender_id');
         $smsApiUrl = config('services.sms.api_url');
 
-        $message = "My Krishi OTP code is: " . $event->otp;
+        // $message = "My Krishi OTP code is: " . $event->otp;
+        $message = "Your one-time password (OTP) for My Krishi is: {$event->otp}. This code is confidential. Do not share it under any circumstances.";
 
         $response = Http::get($smsApiUrl, [
             'api_key' => $apiKey,
