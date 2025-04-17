@@ -174,6 +174,18 @@
                                     placeholder="Enter Service Charge" required>
                             </div>
 
+                            <div class="mb-3">
+                                <label class="form-label">Remarks</label>
+                                <input type="text" class="form-control" name="remarks"
+                                    placeholder="Enter Remarks" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Upload File</label>
+                                <input type="file" class="form-control" name="voucher_file"
+                                    placeholder="Upload File" required>
+                            </div>
+
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                                 <button type="submit" class="btn btn-primary">Save</button>

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\WebController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Mail;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,6 +21,15 @@ Route::get('', function () {
 
 Route::get('/cache-refresh', [WebController::class, 'refreshProjectCache']);
 Route::get('/cache-size', [WebController::class, 'getCacheSize']);
+
+Route::get('/test', function () {
+    Mail::raw('Hi', function ($message) {
+        $message->to('kamranraz28@gmail.com')
+                ->subject('Test Email');
+    });
+
+    return 'Test email sent to kamranraz28@gmail.com';
+});
 
 
 Route::post('/user-login', [WebController::class, 'userLogin'])->name('userLogin');

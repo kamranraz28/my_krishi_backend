@@ -3,7 +3,7 @@
         <a class="mobile-menu" id="mobile-collapse" href="#!"><span></span></a>
         <a href="#!" class="b-brand">
 
-        <img src="{{ asset('assets/images/logo.png') }}" alt="Software Logo" class="logo" style="width: 150px;">
+        <img src="{{ asset('assets/images/my-krishi-3.png') }}" alt="Software Logo" class="logo" style="width: 80px;">
 
         </a>
     </div>

@@ -31,7 +31,7 @@
 <!-- [ auth-signin ] start -->
 <div class="auth-wrapper">
     <div class="auth-content text-center">
-        <img src="assets/images/logo.png" alt="" class="img-fluid mb-4">
+        <img src="assets/images/my-krishi-3.png" alt="" class="img-fluid mb-4" width="250px">
         <div class="card borderless">
             <div class="row align-items-center ">
                 <div class="col-md-12">

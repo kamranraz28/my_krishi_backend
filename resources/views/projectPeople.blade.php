@@ -191,7 +191,7 @@
                             <select id="investor_id" name="investor_id" class="form-control" required>
                                 <option value="">Select an Investor</option>
                                 @foreach($investorList as $investor)
-                                    <option value="{{ $investor->user_id }}">{{ $investor->user->name }}-({{ $investor->user->unique_id }})</option>
+                                    <option value="{{ $investor->user->id }}">{{ $investor->user->name }}-({{ $investor->user->unique_id }})</option>
                                 @endforeach
                             </select>
                         </div>

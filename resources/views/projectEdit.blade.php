@@ -51,6 +51,11 @@
                                         value="{{ $project->details->location ?? '' }}">
                                 </div>
                                 <div class="mb-3">
+                                    <label for="location" class="form-label">Location Map URL</label>
+                                    <input type="text" class="form-control" id="location_map" name="location_map"
+                                        value="{{ $project->details->location_map ?? '' }}">
+                                </div>
+                                <div class="mb-3">
                                     <label for="description" class="form-label">Description</label>
                                     <textarea class="form-control" id="description" name="description"
                                         rows="3">{{ $project->details->description ?? '' }}</textarea>
@@ -60,6 +65,11 @@
                                     <br>
                                     <img src="{{ asset('uploads/projects/' . $project->details->image) }}" class="img-fluid w-50 rounded border" alt="Project Image">
                                     <input class="form-control mt-2" type="file" id="image" name="image">
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Youtube Video Link</label>
+                                    <input type="text" class="form-control" name="youtube_video" value="{{ $project->details->youtube_video ?? '' }}">
                                 </div>
 
                                 <div class="mb-3">

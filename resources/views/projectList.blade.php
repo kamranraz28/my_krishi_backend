@@ -214,6 +214,11 @@
                             </div>
 
                             <div class="mb-3">
+                                <label class="form-label">Location Map URL</label>
+                                <input type="text" class="form-control" name="location_map">
+                            </div>
+
+                            <div class="mb-3">
                                 <label class="form-label">Description</label>
                                 <textarea class="form-control" name="description" required></textarea>
                             </div>
@@ -221,6 +226,11 @@
                             <div class="mb-3">
                                 <label class="form-label">Image</label>
                                 <input type="file" class="form-control" name="image">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Youtube Video Link</label>
+                                <input type="text" class="form-control" name="youtube_video" required>
                             </div>
 
                             <div class="mb-3">

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\ProjectClosed;
+use App\Models\Bank;
 use App\Models\Booking;
 use App\Models\Comment;
 use App\Models\Investor;
@@ -15,6 +17,7 @@ use App\Repositories\UserRepository;
 use Auth;
 use Hash;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Mpdf\Mpdf;
 use Session;
 use Illuminate\Support\Facades\Redis;
@@ -203,8 +206,10 @@ class WebController extends Controller
             'unit_price' => $request->unit_price,
             'unit' => $request->unit,
             'location' => $request->location,
+            'location_map' => $request->location_map,
             'description' => $request->description,
             'image' => $fileName,
+            'youtube_video' => $request->youtube_video,
             'duration' => $request->duration,
             'return_amount' => $request->return_amount
         ]);
@@ -245,16 +250,18 @@ class WebController extends Controller
             'total_price' => $request->total_price,
             'unit_price' => $request->unit_price,
             'unit' => $request->unit,
+            'youtube_video' => $request->youtube_video,
             'location' => $request->location,
             'description' => $request->description,
             'duration' => $request->duration,
             'return_amount' => $request->return_amount,
+            'location_map' => $request->location_map,
         ]);
 
         if ($request->hasFile('image')) {
             $projectDetail->save();
         }
-        $this->projectRepository->refreshProjectCache($id);
+
 
         return redirect()->route('projects')->with('success', 'Project updated successfully');
     }
@@ -361,8 +368,9 @@ class WebController extends Controller
     public function investors()
     {
         $investors = User::with('booking.project.details','investor')->where('level', 200)->get();
+        $banks = Bank::all();
 
-        return view('investor.index', compact('investors'));
+        return view('investor.index', compact('investors', 'banks'));
     }
 
     public function investorDelete($id)
@@ -429,7 +437,12 @@ class WebController extends Controller
             [
                 'nid' => $request->nid,
                 'nid_upload' => $nidFileName,
-                'bank_details' => $request->bank_details,
+                'bank_id' => $request->bank_id,
+                'acc_name' => $request->acc_name,
+                'acc_number' => $request->acc_number,
+                'branch_name' => $request->branch_name,
+                'routing_number' => $request->routing_number,
+                'swift_code' => $request->swift_code,
                 'check_upload' => $checkFileName,
             ]
         );
@@ -489,19 +502,42 @@ class WebController extends Controller
 
     public function projectClose(Request $request)
     {
-        $project = Project::findOrFail($request->project_id);
+        // Validate input (optional but recommended)
+        $request->validate([
+            'project_id' => 'required|exists:projects,id',
+            'closing_amount' => 'required|numeric',
+            'service_charge' => 'required|numeric',
+        ]);
 
+        // Eager load the project with details correctly
+        $project = Project::with('details','cost')->findOrFail($request->project_id);
+
+        // Update the project status
         $project->update([
             'status' => 5,
         ]);
 
+        $imageFileName = null;
+        if ($request->hasFile('voucher_file')) {
+            $imageFile = $request->file('voucher_file');
+            $imageFileName = time() . '_' . $imageFile->getClientOriginalName();
+            $imageFile->move(public_path('uploads/vouchers'), $imageFileName);
+        }
+
+        // Update the project details
         Projectdetail::where('project_id', $request->project_id)->update([
             'closing_amount' => $request->closing_amount,
             'service_charge' => $request->service_charge,
+            'remarks' => $request->remarks,
+            'voucher_file' => $imageFileName,
         ]);
+
+        // Fire the event (if needed)
+        event(new ProjectClosed($project));
 
         return redirect()->back()->with('success', 'Project closed successfully.');
     }
+
 
 
     public function financeDetails($id)

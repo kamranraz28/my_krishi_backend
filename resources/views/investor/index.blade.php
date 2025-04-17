@@ -173,9 +173,44 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="bank_details" class="form-label">Bank Details</label>
-                            <input type="bank_details" class="form-control" name="bank_details" id="bank_details"
-                                placeholder="Enter Investor Bank Details">
+                            <label for="acc_name" class="form-label">Bank Details</label>
+                            <select class="form-control" name="acc_name" id="acc_name">
+                                <option value="">Select Bank</option>
+                                @foreach ($banks as $bank)
+                                    <option value="{{ $bank->id }}">{{ $bank->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+
+                        <div class="mb-3">
+                            <label for="acc_name" class="form-label">Account Name</label>
+                            <input type="text" class="form-control" name="acc_name" id="acc_name"
+                                placeholder="Enter Investor Account Name">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="acc_number" class="form-label">Account Number</label>
+                            <input type="number" class="form-control" name="acc_number" id="acc_number"
+                                placeholder="Enter Investor Account Number">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="branch_name" class="form-label">Branch Name</label>
+                            <input type="text" class="form-control" name="branch_name" id="branch_name"
+                                placeholder="Enter Branch Name">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="routing_number" class="form-label">Routing Number</label>
+                            <input type="text" class="form-control" name="routing_number" id="routing_number"
+                                placeholder="Enter Routing Number">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="swift_code" class="form-label">Swift Code</label>
+                            <input type="number" class="form-control" name="swift_code" id="swift_code"
+                                placeholder="Enter Swift Code">
                         </div>
 
                         <div class="mb-3">

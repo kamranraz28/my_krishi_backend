@@ -16,13 +16,17 @@ class Projectdetail extends Model
         'unit_price',
         'unit',
         'location',
+        'location_map',
         'description',
         'image',
         'duration',
         'return_amount',
         'closing_amount',
         'service_charge',
-        'booked_unit'
+        'booked_unit',
+        'remarks',
+        'voucher_file',
+        'youtube_video'
     ];
 
     protected $appends = ['image_url'];

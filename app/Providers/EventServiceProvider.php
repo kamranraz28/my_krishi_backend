@@ -21,6 +21,9 @@ class EventServiceProvider extends ServiceProvider
         \App\Events\OtpRequested::class => [
             \App\Listeners\SendOtpViaSms::class,
         ],
+        \App\Events\ProjectClosed::class => [
+            \App\Listeners\SendProjectClosedEmail::class,
+        ],
     ];
 
     /**
