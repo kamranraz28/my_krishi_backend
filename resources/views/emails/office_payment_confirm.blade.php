@@ -40,6 +40,7 @@
                                         <th style="border: 1px solid #ddd;">Amount</th>
                                         <th style="border: 1px solid #ddd;">Booking Time</th>
                                         <th style="border: 1px solid #ddd;">Payment Time</th>
+                                        <th style="border: 1px solid #ddd;">Status</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -54,6 +55,7 @@
                                         <td style="border: 1px solid #ddd;">{{ number_format($amount, 2) }} BDT</td>
                                         <td style="border: 1px solid #ddd;">{{ \Carbon\Carbon::parse($booking->created_at)->format('d M Y, h:i A') }}</td>
                                         <td style="border: 1px solid #ddd;">{{ \Carbon\Carbon::parse($booking->updated_at)->format('d M Y, h:i A') }}</td>
+                                        <td style="border: 1px solid #ddd;">Confirmed</td>
 
                                     </tr>
                                 </tbody>
