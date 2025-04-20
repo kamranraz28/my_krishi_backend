@@ -100,5 +100,11 @@ class User extends Authenticatable implements JWTSubject
     {
         return url('uploads/investors/' . $this->image);
     }
+    public function notifications()
+    {
+        return $this->belongsToMany(Notification::class, 'notification_user')
+                    ->withPivot('is_seen')
+                    ->withTimestamps();
+    }
 
 }

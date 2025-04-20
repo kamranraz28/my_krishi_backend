@@ -60,7 +60,8 @@ Route::middleware('auth:api')->group(function () {
         // Route::post('/reaction', [ReactionController::class, 'react']);
         Route::post('/profile/update/{id?}', [InvestorController::class, 'profileUpdate']);
         Route::get('/banks', [InvestorController::class, 'profileEdit']);
-
+        Route::get('/notifications', [InvestorController::class, 'getUnseenNotifications']);
+        Route::post('/notifications/mark-as-seen/{id?}', [InvestorController::class, 'markNotificationAsSeen']);
     });
 
     Route::group(['prefix' => 'agent'], function () {

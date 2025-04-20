@@ -7,9 +7,12 @@ use App\Http\Resources\CommentResource;
 use App\Http\Resources\ProjectUpdateResource;
 use App\Http\Resources\ReplyResource;
 use App\Models\Comment;
+use App\Models\Notification;
+use App\Models\Project;
 use App\Models\Projectagent;
 use App\Models\Projectupdate;
 use App\Models\Reply;
+use App\Models\User;
 use Auth;
 use Illuminate\Http\Request;
 
@@ -91,6 +94,28 @@ class AgentController extends Controller
             'image' => json_encode($fileNames), // Store image paths as JSON
             'description' => $request->description,
         ]);
+
+        // Get the project title
+        $project = Project::with('details')->findOrFail($id);
+        $projectTitle = $project->details->title;
+
+        // Create meaningful notification message
+        $message = "{$projectTitle}: An agent has created a new post.";
+
+        $notification = Notification::create([
+            'project_id' => $id,
+            'created_by' => $user->id,
+            'message' => $message,
+        ]);
+
+        // STEP: Assign notification to all investors who booked in this project
+        $investors = User::whereHas('booking', function ($q) use ($id) {
+            $q->where('project_id', $id);
+        })->get();
+
+        foreach ($investors as $investor) {
+            $notification->users()->attach($investor->id);
+        }
 
         // Return a success response
         return response()->json([

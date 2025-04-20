@@ -750,5 +750,27 @@ class InvestorController extends Controller
         ], 200);
     }
 
+    public function getUnseenNotifications()
+    {
+        $user = Auth::user();
+
+        $notifications = $user->notifications()->wherePivot('is_seen', false)->latest()->get();
+
+        return response()->json([
+            'count' => $notifications->count(),
+            'notifications' => $notifications
+        ]);
+    }
+
+    public function markNotificationAsSeen($notificationId)
+    {
+        $user = Auth::user();
+
+        $user->notifications()->updateExistingPivot($notificationId, ['is_seen' => true]);
+
+        return response()->json(['message' => 'Notification marked as seen']);
+    }
+
+
 
 }
