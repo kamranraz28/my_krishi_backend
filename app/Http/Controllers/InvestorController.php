@@ -8,6 +8,7 @@ use App\Http\Resources\BankResource;
 use App\Http\Resources\BookingResource;
 use App\Http\Resources\CartResource;
 use App\Http\Resources\CommentResource;
+use App\Http\Resources\NotificationResource;
 use App\Http\Resources\ProjectResource;
 use App\Http\Resources\ProjectUpdateResource;
 use App\Http\Resources\ReplyResource;
@@ -754,13 +755,17 @@ class InvestorController extends Controller
     {
         $user = Auth::user();
 
-        $notifications = $user->notifications()->wherePivot('is_seen', false)->latest()->get();
+        $notifications = $user->notifications()
+            ->wherePivot('is_seen', false)
+            ->latest()
+            ->get();
 
         return response()->json([
             'count' => $notifications->count(),
-            'notifications' => $notifications
+            'notifications' => NotificationResource::collection($notifications),
         ]);
     }
+
 
     public function markNotificationAsSeen($notificationId)
     {

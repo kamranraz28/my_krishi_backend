@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class BookingResource extends JsonResource
+class NotificationResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -16,12 +16,10 @@ class BookingResource extends JsonResource
     {
         // return parent::toArray($request);
         return [
-            'id' =>$this->id,
+            'id' => $this->id,
             'project_id' => $this->project_id,
-            'total_unit' => $this->total_unit,
-            'status' => $this->status,
-            'booking_date' => $this->created_at,
-            'project' => new ProjectResource($this->whenLoaded('project')),
+            'message' => $this->message,
+            'time' => $this->created_at->format('d M, Y h:iA'),
         ];
     }
 }
