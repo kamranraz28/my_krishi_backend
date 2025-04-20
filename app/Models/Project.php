@@ -53,4 +53,9 @@ class Project extends Model
         return Carbon::create(2025, 4, 17);
     }
 
+    public function faq()
+    {
+        return $this->hasMany(Faq::class, 'project_id');
+    }
+
 }

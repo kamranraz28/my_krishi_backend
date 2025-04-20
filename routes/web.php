@@ -70,5 +70,10 @@ Route::middleware(['auth', 'preventBackAfterLogout'])->group(function () {
     Route::get('bank-receipt/view/{id?}', [WebController::class, 'viewBankReceopt'])->name('viewBankReceopt');
     Route::get('investors/{id?}/nid/view', [WebController::class, 'viewNid'])->name('viewNid');
     Route::get('investors/{id?}/blank-check/view', [WebController::class, 'viewCheck'])->name('viewCheck');
+    Route::get('add-faq/{id?}', [WebController::class, 'addFAQ'])->name('addFAQ');
+    Route::post('store-faq/{id?}', [WebController::class, 'storeFAQ'])->name('storeFAQ');
+    Route::get('edit-faq/{id?}', [WebController::class, 'editFAQ'])->name('editFAQ');
+    Route::delete('delete-faq/{id?}', [WebController::class, 'deleteFAQ'])->name('deleteFAQ');
+    Route::put('/faq/update/{id}', [WebController::class, 'updateFAQ'])->name('updateFAQ');
 
 });

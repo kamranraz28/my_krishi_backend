@@ -67,7 +67,7 @@ class InvestorController extends Controller
         }
 
         // Fetch the project with its details
-        $details = Project::with('details')->find($id);
+        $details = Project::with('details','faq')->find($id);
 
         // Check if the project exists
         if (!$details) {

@@ -10,6 +10,7 @@ use App\Events\ProjectClosed;
 use App\Models\Bank;
 use App\Models\Booking;
 use App\Models\Comment;
+use App\Models\Faq;
 use App\Models\Investor;
 use App\Models\Project;
 use App\Models\Projectagent;
@@ -767,6 +768,72 @@ class WebController extends Controller
             'Content-Type' => $mimeType,
         ]);
     }
+
+
+    public function addFAQ($id)
+    {
+        $project = Project::with('details')->findOrFail($id);
+        return view('faq.index',compact('project'));
+    }
+
+    public function storeFAQ(Request $request)
+    {
+        $request->validate([
+            'question' => 'required|array',
+            'answer' => 'required|array',
+            'question.*' => 'string|max:255',
+            'answer.*' => 'string|max:1000',
+        ]);
+        //dd($request->all());
+        $project_id = $request->project_id;
+        $questions = $request->question;
+        $answers = $request->answer;
+
+        foreach ($questions as $index => $question) {
+            Faq::create([
+                'project_id' => $project_id,
+                'question' => $question,
+                'answer' => $answers[$index] ?? null,
+            ]);
+        }
+        return redirect()->redirect()->back()->with('success', 'FAQ added successfully.');
+    }
+
+    public function editFAQ($id)
+    {
+        $faq = Faq::with('project.details')->findOrFail($id);
+        return view('faq.edit',compact('faq'));
+    }
+
+    public function updateFAQ(Request $request, $id)
+    {
+        $request->validate([
+            'question' => 'required|string|max:255',
+            'answer' => 'required|string',
+        ]);
+
+        $faq = Faq::findOrFail($id);
+
+        $faq->update([
+            'question' => $request->question,
+            'answer' => $request->answer,
+        ]);
+
+        return redirect()->route('addFAQ', $faq->project_id)
+            ->with('success', 'FAQ updated successfully.');
+    }
+
+    public function deleteFAQ($id)
+    {
+        $faq = Faq::findOrFail($id);
+
+        $faq->delete();
+
+        return redirect()->back()->with('success', 'FAQ deleted successfully.');
+
+
+    }
+
 
 
 

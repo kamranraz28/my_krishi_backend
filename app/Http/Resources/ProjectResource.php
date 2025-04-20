@@ -22,8 +22,8 @@ class ProjectResource extends JsonResource
             //new: Use when you're dealing with one-to-one relationships (hasOne, belongsTo).
             'details' => new DetailsResource($this->whenLoaded('details')),
 
-            //collection: Use when you're dealing with one-to-many or many-to-many relationships (hasMany, belongsToMany).
-            //'details' => DetailsResource::collection($this->whenLoaded('details')),
+            'faqs' => FaqResource::collection($this->whenLoaded('faq')),
+
         ];
     }
 }
