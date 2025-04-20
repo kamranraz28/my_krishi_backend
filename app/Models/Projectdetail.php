@@ -26,7 +26,8 @@ class Projectdetail extends Model
         'booked_unit',
         'remarks',
         'voucher_file',
-        'youtube_video'
+        'youtube_video',
+        'maturity_date',
     ];
 
     protected $appends = ['image_url'];

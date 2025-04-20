@@ -529,12 +529,15 @@ class WebController extends Controller
             $imageFile->move(public_path('uploads/vouchers'), $imageFileName);
         }
 
+        $maturityDate = now()->format('Y-m-d H:i:s');
+
         // Update the project details
         Projectdetail::where('project_id', $request->project_id)->update([
             'closing_amount' => $request->closing_amount,
             'service_charge' => $request->service_charge,
             'remarks' => $request->remarks,
             'voucher_file' => $imageFileName,
+            'maturity_date' => $maturityDate,
         ]);
 
         // Fire the event (if needed)

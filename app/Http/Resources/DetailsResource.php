@@ -33,6 +33,7 @@ class DetailsResource extends JsonResource
             'return_amount' => $this->return_amount,
             'closing_amount' => $this->closing_amount,
             'service_charge' => $this->service_charge,
+            'maturity_date' => $this->maturity_date,
         ];
     }
 }

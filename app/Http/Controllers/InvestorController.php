@@ -67,7 +67,7 @@ class InvestorController extends Controller
         }
 
         // Fetch the project with its details
-        $details = Project::with('details','faq')->find($id);
+        $details = Project::with('details', 'faq')->find($id);
 
         // Check if the project exists
         if (!$details) {
@@ -769,6 +769,90 @@ class InvestorController extends Controller
         $user->notifications()->updateExistingPivot($notificationId, ['is_seen' => true]);
 
         return response()->json(['message' => 'Notification marked as seen']);
+    }
+
+    public function finance()
+    {
+        $user = Auth::user();
+
+        // Ensure the user has the required access level
+        if ($user->level !== 200) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'You are not eligible to do this.'
+            ], 401);
+        }
+
+        $bookings = Booking::with('project')
+            ->where('investor_id', $user->id)
+            ->get();
+
+        $projects = $bookings->pluck('project')->unique('id')->values();
+
+        // Return the investor details as a JSON response
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Showing finance.',
+            'details' => ProjectResource::collection($projects)
+        ], 200);
+    }
+
+    public function maturedFinance()
+    {
+        $user = Auth::user();
+
+        if ($user->level !== 200) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'You are not eligible to do this.'
+            ], 401);
+        }
+
+        // Load bookings with project + project.details
+        $bookings = Booking::with('project.details')
+            ->where('investor_id', $user->id)
+            ->whereHas('project', function ($query) {
+                $query->where('status', 5);
+            })
+            ->get();
+
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Showing matured finance projects.',
+            'bookings' => BookingResource::collection($bookings)
+        ], 200);
+    }
+
+    public function maturedFinanceDetails($id)
+    {
+        $user = Auth::user();
+
+        if ($user->level !== 200) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'You are not eligible to do this.'
+            ], 401);
+        }
+
+        // Load bookings with project + project.details
+        $bookings = Booking::with('project.details')
+            ->where('investor_id', $user->id)
+            ->where('id', $id)
+            ->first();
+
+        if (!$bookings) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Booking not found.'
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Showing matured finance projects.',
+            'booking' => new BookingResource($bookings)
+        ], 200);
     }
 
 
