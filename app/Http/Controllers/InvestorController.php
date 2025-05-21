@@ -813,13 +813,15 @@ class InvestorController extends Controller
             ], 401);
         }
 
-        // Load bookings with project + project.details
         $bookings = Booking::with('project.details')
-            ->where('investor_id', $user->id)
-            ->whereHas('project', function ($query) {
-                $query->where('status', 5);
-            })
-            ->get();
+        ->where('investor_id', $user->id)
+        ->whereHas('project', function ($query) {
+            $query->where('status', 5);
+        })
+        ->get()
+        ->unique('project_id') // This filters only one booking per project
+        ->values(); // optional: resets the keys
+            // Return the investor details as a JSON response
 
 
         return response()->json([
@@ -841,10 +843,7 @@ class InvestorController extends Controller
         }
 
         // Load bookings with project + project.details
-        $bookings = Booking::with('project.details')
-            ->where('investor_id', $user->id)
-            ->where('id', $id)
-            ->first();
+        $bookings = Booking::with('project.details')->findOrFail($id);
 
         if (!$bookings) {
             return response()->json([

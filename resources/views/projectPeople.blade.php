@@ -5,13 +5,31 @@
 @section('content')
 
     <!-- Page Header Section -->
-    <section class="page-header text-center py-5" style="background-color: #f8f9fa;">
+    <section class="page-header py-5" style="background-color: #f8f9fa;">
         <div class="container">
-            <h4 class="page-header__title display-4 font-weight-bold text-primary mb-3">{{ $project->details->title }}</h4>
-            <h5 class="mb-3">Total Units: <span class="text-muted">{{ $project->details->unit }}</span></h5>
-            <h5 class="mb-3">Total Price: <span class="text-muted">{{ $project->details->total_price }}</span></h5>
+            <div
+                class="d-flex justify-content-center align-items-center text-center flex-wrap border rounded shadow-sm overflow-hidden">
+
+                <div class="border-start flex-fill py-3 px-4">
+                    <h5 class="mb-1"> Total unit: {{ $project->details->unit }}</h5>
+                    <h5 class="mb-1"> Booked unit: {{ $project->details->booked_unit }}</h5>
+                    <h5 class="mb-1"> Remaining unit: {{ $remainingUnit }}</h5>
+                </div>
+
+                <div class="flex-fill py-5 px-12">
+                    <h4 class="display-6 font-weight-bold text-primary mb-1">{{ $project->details->title }}</h4>
+                    <h5 class="display-6 font-weight-bold text-primary mb-1">{{ $project->unique_id }}</h5>
+                </div>
+
+                <div class="border-start flex-fill py-3 px-4">
+                    <h5 class="mb-1">Total Investor: {{ $uniqueTotalInvestors }}</h5>
+                    <h5 class="mb-1">Total Agents: {{ $uniqeAgents }}</h5>
+                </div>
+
+            </div>
         </div>
     </section>
+
 
 
     @if(session('success'))
@@ -191,7 +209,8 @@
                             <select id="investor_id" name="investor_id" class="form-control" required>
                                 <option value="">Select an Investor</option>
                                 @foreach($investorList as $investor)
-                                    <option value="{{ $investor->user->id }}">{{ $investor->user->name }}-({{ $investor->user->unique_id }})</option>
+                                    <option value="{{ $investor->user->id }}">
+                                        {{ $investor->user->name }}-({{ $investor->user->unique_id }})</option>
                                 @endforeach
                             </select>
                         </div>

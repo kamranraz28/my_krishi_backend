@@ -26,4 +26,5 @@ class Investor extends Model
     {
         return $this->belongsTo(User::class, 'investor_id', 'id');
     }
+
 }

@@ -226,8 +226,13 @@ class WebController extends Controller
     public function projectEdit($id)
     {
         $project = Project::with('details')->findOrFail($id);
+        $remainingUnit = $project->details->unit - $project->details->booked_unit;
+        $bookings = Booking::with('investor.project.details')->where('project_id', $id)->get();
+        $uniqueTotalInvestors = $bookings->unique('investor_id')->count();
+        $agents = Projectagent::with('user')->where('project_id', $id)->get();
+        $uniqeAgents = $agents->unique('user_id')->count();
 
-        return view('projectEdit', compact('project'));
+        return view('projectEdit', compact('remainingUnit','project','uniqeAgents','uniqueTotalInvestors','bookings', 'agents'));
     }
 
     public function updateProject(Request $request, $id)
@@ -275,11 +280,14 @@ class WebController extends Controller
     public function projectPeople($id)
     {
         $project = Project::with('details')->findOrFail($id);
+        $remainingUnit = $project->details->unit - $project->details->booked_unit;
         $bookings = Booking::with('investor.project.details')->where('project_id', $id)->get();
+        $uniqueTotalInvestors = $bookings->unique('investor_id')->count();
         $agents = Projectagent::with('user')->where('project_id', $id)->get();
+        $uniqeAgents = $agents->unique('user_id')->count();
         $agentList = User::where('level', 300)->get();
         $investorList = Investor::with('user')->get();
-        return view('projectPeople', compact('investorList', 'bookings', 'agents', 'agentList', 'project'));
+        return view('projectPeople', compact('uniqeAgents','uniqueTotalInvestors','investorList', 'bookings', 'agents', 'agentList', 'project', 'remainingUnit'));
     }
 
 
@@ -470,7 +478,13 @@ class WebController extends Controller
         // dd($costs);
         $totalCost = $costs->sum('cost');
 
-        return view('project.cost', compact('project', 'costs', 'totalCost'));
+        $remainingUnit = $project->details->unit - $project->details->booked_unit;
+        $bookings = Booking::with('investor.project.details')->where('project_id', $id)->get();
+        $uniqueTotalInvestors = $bookings->unique('investor_id')->count();
+        $agents = Projectagent::with('user')->where('project_id', $id)->get();
+        $uniqeAgents = $agents->unique('user_id')->count();
+
+        return view('project.cost', compact('project', 'costs', 'totalCost', 'remainingUnit', 'uniqeAgents', 'uniqueTotalInvestors', 'bookings', 'agents'));
     }
 
     public function projectCostsStore(Request $request)

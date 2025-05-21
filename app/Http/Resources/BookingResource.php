@@ -20,7 +20,8 @@ class BookingResource extends JsonResource
             'project_id' => $this->project_id,
             'total_unit' => $this->total_unit,
             'status' => $this->status,
-            'booking_date' => $this->created_at,
+            'booking_date' => $this->created_at->format('d M, Y h:iA'),
+            'project_cost' => $this->project->cost->sum('cost'),
             'project' => new ProjectResource($this->whenLoaded('project')),
         ];
     }
