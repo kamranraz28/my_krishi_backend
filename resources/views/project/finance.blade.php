@@ -22,7 +22,7 @@
                         <div class="card-body">
                             <h5 class="mb-4 text-primary font-weight-bold display-5">Financial Details</h5>
                             <div class="d-flex justify-content-end mb-4">
-                                <a href="{{ route('printFinanceDetails', ['id' => $project->id]) }}" target="_blank" class="btn btn-primary btn-lg shadow-lg">
+                                <a href="{{ route('projects.printFinanceDetails', ['id' => $project->id]) }}" target="_blank" class="btn btn-primary btn-lg shadow-lg">
                                     <i class="fas fa-print"></i> Print Details
                                 </a>
                             </div>

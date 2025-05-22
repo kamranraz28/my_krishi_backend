@@ -34,7 +34,7 @@
     <div class="d-flex justify-content-end mb-4">
         {{-- Start Project --}}
         @if ($project->status == 1)
-            <a href="{{ route('startProject', ['id' => $project->id]) }}" class="btn btn-primary me-2" onclick="return confirm('Are you sure you want to start this project?')">
+            <a href="{{ route('projects.start', ['id' => $project->id]) }}" class="btn btn-primary me-2" onclick="return confirm('Are you sure you want to start this project?')">
                 <i class="fas fa-play"></i> Start Project
             </a>
         @else
@@ -56,7 +56,7 @@
 
         {{-- Financial Details --}}
         @if ($project->status == 5)
-            <a href="{{ route('financeDetails', ['id' => $project->id]) }}" class="btn btn-success">
+            <a href="{{ route('projects.financeDetails', ['id' => $project->id]) }}" class="btn btn-success">
                 <i class="fas fa-file-invoice-dollar"></i> Financial Details
             </a>
         @else
@@ -99,7 +99,7 @@
                             <h5 class="mb-0">Add Project Costs</h5>
                         </div>
                         <div class="card-body">
-                            <form action="{{ route('projectCostsStore') }}" method="POST">
+                            <form action="{{ route('projects.financeStore') }}" method="POST">
                                 @csrf
                                 <input type="hidden" name="project_id" value="{{ $project->id }}">
                                 <div id="field-container">
@@ -190,7 +190,7 @@
                         </button>
                     </div>
                     <div class="modal-body">
-                        <form action="{{ route('projectClose') }}" method="POST" enctype="multipart/form-data">
+                        <form action="{{ route('projects.close') }}" method="POST" enctype="multipart/form-data">
                             @csrf
                             <input type="hidden" name="project_id" value="{{ $project->id }}">
                             <div class="mb-3">
@@ -213,7 +213,7 @@
                             <div class="mb-3">
                                 <label class="form-label">Upload File</label>
                                 <input type="file" class="form-control" name="voucher_file" placeholder="Upload File"
-                                    required>
+                                    >
                             </div>
 
                             <div class="modal-footer">

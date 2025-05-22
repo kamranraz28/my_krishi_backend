@@ -9,12 +9,6 @@
         </div>
     </section>
 
-    <div class="d-flex justify-content-end mb-4">
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createProjectModal">
-            <i class="fas fa-plus"></i> Create Project
-        </button>
-    </div>
-
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show d-flex justify-content-between align-items-center"
             role="alert">
@@ -35,24 +29,30 @@
         </div>
     @endif
 
-    <!-- Projects Section -->
-    <section class="blog-one">
+<section class="blog-one">
         <div class="container">
             <div class="row gutter-y-30">
                 <div class="col-md-12">
                     <div class="card">
-                        <div class="card-header">
+                        <!-- Card Header: Title Left, Button Right -->
+                        <div class="card-header d-flex justify-content-between align-items-center">
                             <h5 class="mb-0">Filter By Status</h5>
+                            <a href="{{ route('projects.create') }}" class="btn btn-primary">
+                                Add Project
+                            </a>
                         </div>
+
+                        <!-- Card Body: Filter Form -->
                         <div class="card-body">
-                            <form action="{{ route('projectFilter') }}" method="POST" id="projectCostForm">
+                            <form action="{{ route('projects.filter') }}" method="POST" id="projectCostForm">
                                 @csrf
                                 <div id="field-container">
                                     <div class="row mb-3 field-group">
                                         <div class="col-md-5">
                                             <select class="form-control" name="status" id="status">
                                                 <option value="">All</option>
-                                                <option value="1" {{ session('status') == '1' ? 'selected' : '' }}>Running</option>
+                                                <option value="1" {{ session('status') == '1' ? 'selected' : '' }}>Initiated</option>
+                                                <option value="2" {{ session('status') == '2' ? 'selected' : '' }}>Running</option>
                                                 <option value="5" {{ session('status') == '5' ? 'selected' : '' }}>Closed</option>
                                             </select>
                                         </div>
@@ -126,7 +126,7 @@
                                 </a>
 
 
-                                <a href="{{ route('projectCosts', ['id' => $project->id]) }}" class="btn btn-primary"
+                                <a href="{{ route('projects.finance', ['id' => $project->id]) }}" class="btn btn-primary"
                                     style="margin-top: 5px;">
                                     <i class="icofont-arrow-right"></i> Finance
                                 </a>
@@ -174,93 +174,7 @@
         </div>
 
 
-        <!-- Updated Modal -->
-        <div class="modal fade" id="createProjectModal" tabindex="-1" aria-labelledby="createProjectModalLabel"
-            aria-hidden="true">
-            <div class="modal-dialog modal-lg"> <!-- Added modal-lg to make it wider -->
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="createProjectModalLabel">Create Project</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
-                            <i class="fas fa-times"></i> <!-- Font Awesome "X" Icon -->
-                        </button>
 
-                    </div>
-                    <div class="modal-body">
-                        <form action="{{ route('projects.store') }}" method="POST" enctype="multipart/form-data">
-                            @csrf
-
-                            <div class="mb-3">
-                                <label class="form-label">Title</label>
-                                <input type="text" class="form-control" name="title" required>
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Total Price</label>
-                                <input type="number" class="form-control" name="total_price" required>
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Unit Price</label>
-                                <input type="number" class="form-control" name="unit_price" required>
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Units</label>
-                                <input type="number" class="form-control" name="unit" required>
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Location</label>
-                                <input type="text" class="form-control" name="location" required>
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Location Map URL</label>
-                                <input type="text" class="form-control" name="location_map">
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Description</label>
-                                <textarea class="form-control" name="description" required></textarea>
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Image</label>
-                                <input type="file" class="form-control" name="image">
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Youtube Video Link</label>
-                                <input type="text" class="form-control" name="youtube_video" required>
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Duration</label>
-                                <input type="text" class="form-control" name="duration" required>
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Return Amount (%)</label>
-                                <input type="text" class="form-control" name="return_amount" required>
-                            </div>
-
-
-                            <div class="col-md-3">
-                                <label class="form-label">Terms and Condition</label>
-                                <input type="text" class="form-control" name="terms_url">
-
-                            </div>
-
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                <button type="submit" class="btn btn-primary">Save Project</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
 
 
 
