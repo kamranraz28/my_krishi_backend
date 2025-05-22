@@ -52,7 +52,7 @@
                         <span class="pcoded-mtext">People</span>
                     </a>
                     <ul class="pcoded-submenu">
-                        <li><a href="{{ route('agents') }}">Agent</a></li>
+                        <li><a href="{{ route('agents.index') }}">Agent</a></li>
                         <li><a href="{{ route('investors.index') }}">Investor</a></li>
                     </ul>
                 </li>

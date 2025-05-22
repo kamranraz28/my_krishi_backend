@@ -113,7 +113,7 @@
                                     Period: {{ $project->details->duration }} <br />
                                     Return: {{ $project->details->return_amount }}%
                                 </p>
-                                <a href="{{ route('projectUpdates', ['id' => $project->id]) }}" class="btn btn-primary">
+                                <a href="{{ route('projects.updates', ['id' => $project->id]) }}" class="btn btn-primary">
                                     <i class="icofont-arrow-right"></i> Updates
                                 </a>
 
@@ -125,9 +125,14 @@
                                     <i class="icofont-arrow-right"></i> Edit
                                 </a>
 
+                                <a href="{{ route('faqs.index', ['id' => $project->id]) }}" class="btn btn-primary"
+                                    style="margin-top: 2px;">
+                                    <i class="icofont-arrow-right"></i> FAQ
+                                </a>
+
 
                                 <a href="{{ route('projects.finance', ['id' => $project->id]) }}" class="btn btn-primary"
-                                    style="margin-top: 5px;">
+                                    style="margin-top: 2px;">
                                     <i class="icofont-arrow-right"></i> Finance
                                 </a>
 

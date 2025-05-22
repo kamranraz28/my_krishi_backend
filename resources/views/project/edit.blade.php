@@ -31,16 +31,7 @@
     </section>
 
 
-    <!-- Add FAQ Button -->
-    <section class="mb-4">
-        <div class="container">
-            <div class="d-flex justify-content-end">
-                <a href="{{ route('addFAQ', $project->id) }}" class="btn btn-outline-info">
-                    <i class="fas fa-plus-circle me-1"></i> Add FAQ
-                </a>
-            </div>
-        </div>
-    </section>
+
 
     <!-- Project Update Form -->
     <section class="pb-5">

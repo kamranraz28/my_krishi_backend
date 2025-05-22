@@ -59,26 +59,38 @@
                                     </thead>
                                     <tbody>
                                         @foreach($bookings as $key => $booking)
-                                            <tr>
-                                                <td>{{ $key + 1 }}</td>
-                                                <!-- <td>
-                                                    <a href="{{ route('projectUpdates', $booking->project_id) }}" class="btn btn-info btn-sm">
-                                                        {{ $booking->project->details->title }}
-                                                    </a>
-                                                    <span class="badge bg-primary ms-2">{{ $booking->project->unique_id }}</span>
-                                                </td> -->
-                                                <td>
-                                                    <a href="{{ route('projectUpdates', $booking->project_id) }}" class="btn btn-info btn-sm d-block">
-                                                        {{ $booking->project->details->title }}
-                                                    </a>
-                                                    <span class="badge bg-primary mt-1 d-inline-block">{{ $booking->project->unique_id }}</span>
-                                                </td>
+                                                                                <tr>
+                                                                                    <td>{{ $key + 1 }}</td>
 
-                                                <td>{{ $booking->project->details->unit_price }}</td>
-                                                <td>{{ $booking->total_unit }}</td>
-                                                <td>{{ ($booking->project->details->unit_price ?? 0) * ($booking->total_unit ?? 0) }}</td>
-                                                <td>{{ $booking->created_at }}</td>
-                                            </tr>
+                                                                                    @php
+                                                                                        $projectStatus = $booking->project->status;
+                                                                                        $btnClass = 'btn-secondary'; // default
+
+                                                                                        if ($projectStatus == 1) {
+                                                                                            $btnClass = 'btn-primary';
+                                                                                        } elseif ($projectStatus == 2) {
+                                                                                            $btnClass = 'btn-info';
+                                                                                        } elseif ($projectStatus == 5) {
+                                                                                            $btnClass = 'btn-danger'; // red
+                                                                                        }
+                                                                                    @endphp
+
+                                            <td>
+                                                                                        <a href="{{ route('projects.updates', $booking->project_id) }}"
+                                                                                            class="btn {{ $btnClass }} btn-sm d-block">
+                                                                                            {{ $booking->project->details->title }}
+                                                                                        </a>
+                                                                                        <span
+                                                                                            class="badge bg-primary mt-1 d-inline-block">{{ $booking->project->unique_id }}</span>
+                                                                                    </td>
+
+
+                                                                                    <td>{{ $booking->project->details->unit_price }}</td>
+                                                                                    <td>{{ $booking->total_unit }}</td>
+                                                                                    <td>{{ ($booking->project->details->unit_price ?? 0) * ($booking->total_unit ?? 0) }}
+                                                                                    </td>
+                                                                                    <td>{{ $booking->created_at }}</td>
+                                                                                </tr>
                                         @endforeach
                                     </tbody>
                                 </table>

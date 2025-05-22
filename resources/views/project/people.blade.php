@@ -79,7 +79,7 @@
                                         <tr>
                                             <td>{{ $key + 1 }}</td>
                                             <td>
-                                                <a href="{{ route('investorHistory', $booking->investor->id) }}"
+                                                <a href="{{ route('investors.history', $booking->investor->id) }}"
                                                     class="btn btn-info btn-sm d-block">
                                                     {{ $booking->investor->name ?? '' }}
                                                 </a>
@@ -130,15 +130,12 @@
                                             <td>{{ $agent->user->phone ?? ''}}</td>
                                             <td>{{ $agent->user->email ?? ''}}</td>
                                             <td>
-                                                <form action="{{ route('agent.delete', $agent->id) }}" method="POST"
-                                                    style="display: inline;"
-                                                    onsubmit="return confirm('Are you sure you want to remove this agent?');">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-danger btn-sm">
-                                                        Remove Agent
-                                                    </button>
-                                                </form>
+                                                <a href="{{ route('projects.removeAgent', $agent->id) }}"
+                                                    class="btn btn-danger btn-sm"
+                                                    onclick="return confirm('Are you sure you want to activate this investor?');">
+                                                    Remove
+                                                </a>
+
                                             </td>
 
 
@@ -168,7 +165,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"><i
                             class="fas fa-times"></i></button>
                 </div>
-                <form action="{{ route('assign.agent') }}" method="POST">
+                <form action="{{ route('projects.assignAgent') }}" method="POST">
                     @csrf
                     <input type="hidden" name="project_id" value="{{ request()->route('id') }}">
                     <div class="modal-body">
@@ -200,7 +197,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"><i
                             class="fas fa-times"></i></button>
                 </div>
-                <form action="{{ route('assign.investor') }}" method="POST">
+                <form action="{{ route('projects.assignInvestor') }}" method="POST">
                     @csrf
                     <input type="hidden" name="project_id" value="{{ request()->route('id') }}">
                     <div class="modal-body">
@@ -210,7 +207,8 @@
                                 <option value="">Select an Investor</option>
                                 @foreach($investorList as $investor)
                                     <option value="{{ $investor->user->id }}">
-                                        {{ $investor->user->name }}-({{ $investor->user->unique_id }})</option>
+                                        {{ $investor->user->name }}-({{ $investor->user->unique_id }})
+                                    </option>
                                 @endforeach
                             </select>
                         </div>

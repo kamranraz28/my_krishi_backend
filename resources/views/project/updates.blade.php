@@ -80,7 +80,7 @@
                         @endforeach
                     </div>
                     <div class="post-comment-form">
-                        <form action="{{ route('comment', ['id' => $update->id]) }}" method="POST">
+                        <form action="{{ route('projects.comment', ['id' => $update->id]) }}" method="POST">
                             @csrf
                             <div class="comment-box">
                                 <input type="text" name="comment" placeholder="Write a comment..." class="comment-input">

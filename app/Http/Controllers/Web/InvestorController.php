@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
 use App\Models\Bank;
+use App\Models\Booking;
 use App\Models\Investor;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -179,6 +180,14 @@ class InvestorController extends Controller
         return response()->file($path, [
             'Content-Type' => $mimeType,
         ]);
+    }
+
+    public function history($id)
+    {
+        $user = User::find($id);
+        $bookings = Booking::with('project.details', 'investor')->where('investor_id', $id)->get();
+
+        return view('investor.history', compact('bookings', 'user'));
     }
 
 

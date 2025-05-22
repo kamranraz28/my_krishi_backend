@@ -38,7 +38,7 @@
                             <h5 class="mb-0">Add FAQ</h5>
                         </div>
                         <div class="card-body">
-                            <form action="{{ route('updateFAQ', $faq->id) }}" method="POST">
+                            <form action="{{ route('faqs.update', $faq->id) }}" method="POST">
                                 @csrf
                                 @method('PUT')
 

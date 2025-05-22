@@ -5,11 +5,13 @@ namespace App\Http\Controllers\Web;
 use App\Events\ProjectClosed;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
+use App\Models\Comment;
 use App\Models\Investor;
 use App\Models\Project;
 use App\Models\Projectagent;
 use App\Models\Projectcost;
 use App\Models\Projectdetail;
+use App\Models\Projectupdate;
 use App\Models\User;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Request;
@@ -175,6 +177,29 @@ class ProjectController extends Controller
         $agentList = User::where('level', 300)->get();
         $investorList = Investor::with('user')->get();
         return view('project.people', compact('uniqeAgents','uniqueTotalInvestors','investorList', 'bookings', 'agents', 'agentList', 'project', 'remainingUnit'));
+    }
+
+    public function updates($id)
+    {
+        $project = Project::with('details')->findOrFail($id);
+        // Fetch project updates for the given project ID, including comments and replies
+        $projectUpdates = Projectupdate::with('user', 'comment.reply')->where('project_id', $id)->get();
+        //dd($projectUpdates);
+        // Transform the project updates to format images correctly
+        $projectUpdates->transform(function ($update) {
+            // Decode JSON images
+            $images = json_decode($update->image, true) ?? [];
+
+            // Generate full URLs for images
+            $update->image_urls = array_map(fn($path) => url($path), $images);
+
+            return $update;
+        });
+
+        // dd($projectUpdates);
+
+        // Return the view with project updates data
+        return view('project.updates', compact('projectUpdates', 'project'));
     }
 
 
@@ -352,6 +377,71 @@ class ProjectController extends Controller
 
         // If you want to download the PDF afterward, you can use the following code
         // $mpdf->Output('finance_details_' . $project->id . '.pdf', 'D'); // This would trigger the download
+    }
+
+    public function comment(Request $request, $id)
+    {
+        // Validate the request
+        $request->validate([
+            'comment' => 'required|string',
+        ]);
+
+        // Create a new comment
+        Comment::create([
+            'projectupdate_id' => $id,
+            'comment_by' => Auth::id(),
+            'comment' => $request->comment,
+        ]);
+
+        // Redirect back to the project updates page
+        return redirect()->back();
+    }
+
+    public function assignAgent()
+    {
+        $data = request()->validate([
+            'project_id' => 'required',
+            'agent_id' => 'required'
+        ]);
+        //dd($data);
+
+        Projectagent::create($data);
+
+        return redirect()->back()->with('success', 'Agent assigned successfully.');
+    }
+
+    public function removeAgent($id)
+    {
+        $agent = ProjectAgent::find($id);
+
+        if ($agent) {
+            $agent->delete();
+            return redirect()->back()->with('success', 'Agent removed successfully.');
+        }
+
+        return redirect()->back()->with('error', 'Agent not found.');
+    }
+
+    public function assignInvestor(Request $request)
+    {
+        $now = now();
+        $futureDateTime = $now->addHours(24)->format('Y-m-d H:i:s');
+
+        Booking::create([
+            'project_id' => $request->project_id,
+            'investor_id' => $request->investor_id,
+            'total_unit' => $request->unit,
+            'status' => 2,
+            'payment_method' => 2,
+            'time_to_pay' => $futureDateTime,
+            'payment_note' => $request->payment_note,
+        ]);
+
+        // Increment projectdetail booked_unit
+        Projectdetail::where('project_id', $request->project_id)
+        ->increment('booked_unit', $request->unit);
+
+        return redirect()->back()->with('success', 'Project Booking Successful.');
     }
 
 }

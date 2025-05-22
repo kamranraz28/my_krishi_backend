@@ -27,4 +27,9 @@ class Investor extends Model
         return $this->belongsTo(User::class, 'investor_id', 'id');
     }
 
+    public function bookings()
+    {
+        return $this->hasMany(Booking::class, 'investor_id', 'investor_id');
+    }
+
 }

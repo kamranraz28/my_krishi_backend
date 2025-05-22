@@ -32,6 +32,41 @@
         </div>
     @endif
 
+    <section class="blog-one">
+        <div class="container">
+            <div class="row gutter-y-30">
+                <div class="col-md-12">
+                    <div class="card">
+                        <!-- Card Header: Title Left, Button Right -->
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Filter By Status</h5>
+                            <a href="{{ route('agents.create') }}" class="btn btn-primary">
+                                Add Agent
+                            </a>
+                        </div>
+
+                        <!-- Card Body: Filter Form -->
+                        <div class="card-body">
+                            <form action="{{ route('agents.filter') }}" method="POST">
+                                @csrf
+                                <div class="row mb-3">
+                                    <div class="col-md-5">
+                                        <select class="form-control" name="status" id="status"
+                                            onchange="this.form.submit()">
+                                            <option value="1" {{ session('status') == '1' ? 'selected' : '' }}>Active
+                                            </option>
+                                            <option value="2" {{ session('status') == '2' ? 'selected' : '' }}>Suspened
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    </section>
+
 
 
     <!-- Projects Section -->
@@ -42,10 +77,7 @@
                 <div class="col-md-12">
                     <div class="card">
                         <div class="card-header">
-                            <button type="button" class="btn btn-primary" data-bs-toggle="modal"
-                                data-bs-target="#addAgentModal">
-                                Add Agent
-                            </button>
+
                             <div class="card-body">
                                 <table class="table" id="example">
                                     <thead>
@@ -72,15 +104,20 @@
                                                 <td>{{ $agent->email ?? ''}}</td>
 
                                                 <td>
-                                                    <form action="{{ route('agentDelete', $agent->id) }}" method="POST"
-                                                        style="display: inline;"
-                                                        onsubmit="return confirm('Are you sure you want to delete this agent?');">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="btn btn-danger btn-sm">
-                                                            Delete
-                                                        </button>
-                                                    </form>
+                                                    @if ($agent->status == 1)
+                                                        <a href="{{ route('agents.suspend', $agent->id) }}"
+                                                            class="btn btn-danger btn-sm"
+                                                            onclick="return confirm('Are you sure you want to suspend this agent?');">
+                                                            Suspend
+                                                        </a>
+                                                    @else
+                                                        <a href="{{ route('agents.activate', $agent->id) }}"
+                                                            class="btn btn-success btn-sm"
+                                                            onclick="return confirm('Are you sure you want to activate this agent?');">
+                                                            Activate
+                                                        </a>
+
+                                                    @endif
                                                 </td>
 
 
@@ -98,42 +135,7 @@
             </div>
     </section>
 
-    <!-- Add Agent Modal -->
-    <div class="modal fade" id="addAgentModal" tabindex="-1" aria-labelledby="addAgentModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="addAgentModalLabel">Create New Agent</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"><i
-                            class="fas fa-times"></i></button>
-                </div>
-                <form action="{{ route('agentStore') }}" method="POST">
-                    @csrf
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label for="name" class="form-label">Agent Name</label>
-                            <input type="text" class="form-control" name="name" id="name" placeholder="Enter Agent Name"
-                                required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="phone" class="form-label">Agent Phone</label>
-                            <input type="text" class="form-control" name="phone" id="phone" placeholder="Enter Agent Phone"
-                                required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="email" class="form-label">Agent Email</label>
-                            <input type="email" class="form-control" name="email" id="email" placeholder="Enter Agent Email"
-                                required>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary">Confirm Agent</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+
 
 
 @endsection

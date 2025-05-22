@@ -56,7 +56,8 @@
                                             onchange="this.form.submit()">
                                             <option value="1" {{ session('status') == '1' ? 'selected' : '' }}>Active
                                             </option>
-                                            <option value="2" {{ session('status') == '2' ? 'selected' : '' }}>Suspened</option>
+                                            <option value="2" {{ session('status') == '2' ? 'selected' : '' }}>Suspened
+                                            </option>
                                         </select>
                                     </div>
                                 </div>
@@ -99,61 +100,77 @@
                                         </thead>
                                         <tbody>
                                             @foreach($investors as $key => $investor)
-                                                <tr>
-                                                    <td>{{ $key + 1 }}</td>
-                                                    <td>
-                                                        <a href="{{ route('investorHistory', $investor->id) }}"
-                                                            class="btn btn-info btn-sm d-block">
-                                                            {{ $investor->name ?? '' }}
-                                                        </a>
-                                                        <span
-                                                            class="badge bg-primary mt-1 d-inline-block">{{ $investor->unique_id ?? ''}}</span>
-                                                    </td>
+                                                                                        <tr>
+                                                                                            <td>{{ $key + 1 }}</td>
+                                                                                            @php
+                                                                                                $hasName = !empty($investor->name);
+                                                                                                $hasBookings = $investor->booking && $investor->booking->count() > 0;
 
-                                                    <td>{{ $investor->phone ?? ''}}</td>
-                                                    <td>{{ $investor->email ?? ''}}</td>
-                                                    <td>{{ $investor->address ?? ''}}</td>
-                                                    <td>{{ $investor->investor->nid ?? ''}}</td>
-                                                    <td>
-                                                        @if ($investor->investor)
-                                                            <a href="{{ route('investors.nid', $investor->investor->id) }}"
-                                                                target="_blank" class="btn btn-secondary btn-sm d-block">
-                                                                <i class="fas fa-eye me-1"></i> View NID
-                                                            </a>
-                                                        @else
-                                                            N/A
-                                                        @endif
-                                                    </td>
-                                                    <td>{{ $investor->investor->bank_details ?? ''}}</td>
-                                                    <td>
-                                                        @if ($investor->investor)
-                                                            <a href="{{ route('investors.cheque', $investor->investor->id) }}"
-                                                                target="_blank" class="btn btn-secondary btn-sm d-block">
-                                                                <i class="fas fa-eye me-1"></i> View Check
-                                                            </a>
-                                                        @else
-                                                            N/A
-                                                        @endif
-                                                    </td>
+                                                                                                $btnClass = 'btn-secondary'; // default
 
-                                                    <td>
-                                                        @if ($investor->status == 1)
-                                                            <a href="{{ route('investors.suspend', $investor->id) }}"
-                                                            class="btn btn-danger btn-sm"
-                                                            onclick="return confirm('Are you sure you want to suspend this investor?');">
-                                                            Suspend
-                                                        </a>
-                                                        @else
-                                                            <a href="{{ route('investors.activate', $investor->id) }}"
-                                                                class="btn btn-success btn-sm"
-                                                                onclick="return confirm('Are you sure you want to activate this investor?');">
-                                                                Activate
-                                                            </a>
+                                                                                                if (!$hasName) {
+                                                                                                    $btnClass = 'btn-primary'; // Blue if no name
+                                                                                                } elseif ($hasName && !$hasBookings) {
+                                                                                                    $btnClass = 'btn-warning'; // Yellow if name but no bookings
+                                                                                                } elseif ($hasBookings) {
+                                                                                                    $btnClass = 'btn-info'; // Green if bookings exist
+                                                                                                }
+                                                                                            @endphp
 
-                                                        @endif
+                                                <td>
+                                                                                                <a href="{{ route('investors.history', $investor->id) }}"
+                                                                                                    class="btn {{ $btnClass }} btn-sm d-block">
+                                                                                                    {{ $investor->name ?? 'No Name' }}
+                                                                                                </a>
+                                                                                                <span
+                                                                                                    class="badge bg-primary mt-1 d-inline-block">{{ $investor->unique_id ?? '' }}</span>
+                                                                                            </td>
 
-                                                    </td>
-                                                </tr>
+
+                                                                                            <td>{{ $investor->phone ?? ''}}</td>
+                                                                                            <td>{{ $investor->email ?? ''}}</td>
+                                                                                            <td>{{ $investor->address ?? ''}}</td>
+                                                                                            <td>{{ $investor->investor->nid ?? ''}}</td>
+                                                                                            <td>
+                                                                                                @if ($investor->investor)
+                                                                                                    <a href="{{ route('investors.nid', $investor->investor->id) }}"
+                                                                                                        target="_blank" class="btn btn-secondary btn-sm d-block">
+                                                                                                        <i class="fas fa-eye me-1"></i> View NID
+                                                                                                    </a>
+                                                                                                @else
+                                                                                                    N/A
+                                                                                                @endif
+                                                                                            </td>
+                                                                                            <td>{{ $investor->investor->bank_details ?? ''}}</td>
+                                                                                            <td>
+                                                                                                @if ($investor->investor)
+                                                                                                    <a href="{{ route('investors.cheque', $investor->investor->id) }}"
+                                                                                                        target="_blank" class="btn btn-secondary btn-sm d-block">
+                                                                                                        <i class="fas fa-eye me-1"></i> View Check
+                                                                                                    </a>
+                                                                                                @else
+                                                                                                    N/A
+                                                                                                @endif
+                                                                                            </td>
+
+                                                                                            <td>
+                                                                                                @if ($investor->status == 1)
+                                                                                                    <a href="{{ route('investors.suspend', $investor->id) }}"
+                                                                                                        class="btn btn-danger btn-sm"
+                                                                                                        onclick="return confirm('Are you sure you want to suspend this investor?');">
+                                                                                                        Suspend
+                                                                                                    </a>
+                                                                                                @else
+                                                                                                    <a href="{{ route('investors.activate', $investor->id) }}"
+                                                                                                        class="btn btn-success btn-sm"
+                                                                                                        onclick="return confirm('Are you sure you want to activate this investor?');">
+                                                                                                        Activate
+                                                                                                    </a>
+
+                                                                                                @endif
+
+                                                                                            </td>
+                                                                                        </tr>
                                             @endforeach
                                         </tbody>
                                     </table>
