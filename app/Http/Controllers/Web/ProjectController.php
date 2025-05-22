@@ -160,7 +160,7 @@ class ProjectController extends Controller
         $uniqeAgents = $agents->unique('user_id')->count();
         $agentList = User::where('level', 300)->get();
         $investorList = Investor::with('user')->get();
-        return view('projectPeople', compact('uniqeAgents','uniqueTotalInvestors','investorList', 'bookings', 'agents', 'agentList', 'project', 'remainingUnit'));
+        return view('project.people', compact('uniqeAgents','uniqueTotalInvestors','investorList', 'bookings', 'agents', 'agentList', 'project', 'remainingUnit'));
     }
 
 }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Web\InvestorController;
 use App\Http\Controllers\Web\ProjectController;
 use App\Http\Controllers\Web\TermsController;
 use App\Http\Controllers\WebController;
@@ -46,10 +47,20 @@ Route::middleware(['auth', 'preventBackAfterLogout'])->group(function () {
         Route::resource('/', ProjectController::class)->parameters(['' => 'project']);
     });
 
+    Route::get('/project-people/{id?}', [ProjectController::class, 'people'])->name('projects.people');
+
+    Route::prefix('investors')->name('investors.')->group(function () {
+        Route::resource('/', InvestorController::class)->parameters(['' => 'investor']);
+        Route::post('/filter', [InvestorController::class, 'filter'])->name('filter');
+        Route::get('/{id?}/suspend', [InvestorController::class, 'suspend'])->name('suspend');
+        Route::get('/{id?}/activate', [InvestorController::class, 'activate'])->name('activate');
+        Route::get('/{id?}/nid/view', [InvestorController::class, 'nid'])->name('nid');
+        Route::get('/{id?}/blank-cheque/view', [InvestorController::class, 'cheque'])->name('cheque');
+
+    });
 
     Route::post('/project-filter', [WebController::class, 'projectFilter'])->name('projectFilter');
     Route::get('/projects/updates/{id?}', [WebController::class, 'projectUpdates'])->name('projectUpdates');
-    Route::get('/project-people/{id?}', [WebController::class, 'projectPeople'])->name('projectPeople');
     Route::get('/investor-history/{id?}', [WebController::class, 'investorHistory'])->name('investorHistory');
     Route::post('/comment/{id?}', [WebController::class, 'comment'])->name('comment');
     Route::post('/assign-agent', [WebController::class, 'assignAgent'])->name('assign.agent');
@@ -58,9 +69,7 @@ Route::middleware(['auth', 'preventBackAfterLogout'])->group(function () {
     Route::get('/agents', [WebController::class, 'agents'])->name('agents');
     Route::delete('/agent/delete/{id?}', [WebController::class, 'agentDelete'])->name('agentDelete');
     Route::post('/agent-store', [WebController::class, 'agentStore'])->name('agentStore');
-    Route::get('/investors', [WebController::class, 'investors'])->name('investors');
     Route::delete('/investor/delete/{id?}', [WebController::class, 'investorDelete'])->name('investorDelete');
-    Route::post('/investor-store', [WebController::class, 'investorStore'])->name('investorStore');
     Route::get('/projects/costs/{id?}', [WebController::class, 'projectCosts'])->name('projectCosts');
     Route::post('/projects/costs/store', [WebController::class, 'projectCostsStore'])->name('projectCostsStore');
     Route::post('/projects/close', [WebController::class, 'projectClose'])->name('projectClose');
@@ -74,8 +83,6 @@ Route::middleware(['auth', 'preventBackAfterLogout'])->group(function () {
     Route::get('bank-payment/confirm/{id?}', [WebController::class, 'confirmBankPayment'])->name('confirmBankPayment');
     Route::get('bank-payment/cancel/{id?}', [WebController::class, 'cancelBankPayment'])->name('cancelBankPayment');
     Route::get('bank-receipt/view/{id?}', [WebController::class, 'viewBankReceopt'])->name('viewBankReceopt');
-    Route::get('investors/{id?}/nid/view', [WebController::class, 'viewNid'])->name('viewNid');
-    Route::get('investors/{id?}/blank-check/view', [WebController::class, 'viewCheck'])->name('viewCheck');
     Route::get('add-faq/{id?}', [WebController::class, 'addFAQ'])->name('addFAQ');
     Route::post('store-faq/{id?}', [WebController::class, 'storeFAQ'])->name('storeFAQ');
     Route::get('edit-faq/{id?}', [WebController::class, 'editFAQ'])->name('editFAQ');

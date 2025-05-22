@@ -117,7 +117,7 @@
                                     <i class="icofont-arrow-right"></i> Updates
                                 </a>
 
-                                <a href="{{ route('projectPeople', ['id' => $project->id]) }}" class="btn btn-primary">
+                                <a href="{{ route('projects.people', ['id' => $project->id]) }}" class="btn btn-primary">
                                     <i class="icofont-arrow-right"></i> People
                                 </a>
 
