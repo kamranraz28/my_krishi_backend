@@ -18,6 +18,7 @@ class ProjectResource extends JsonResource
             'id' => $this->id,
             'unique_id' => $this->unique_id,
             'status' => $this->status,
+            'start_date' => $this->start_date,
 
             //new: Use when you're dealing with one-to-one relationships (hasOne, belongsTo).
             'details' => new DetailsResource($this->whenLoaded('details')),

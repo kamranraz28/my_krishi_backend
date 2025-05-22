@@ -4,10 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Tonysm\RichTextLaravel\Models\Traits\HasRichText;
 
 class Projectdetail extends Model
 {
     use HasFactory;
+    use HasRichText;
+
 
     protected $fillable = [
         'project_id',
@@ -28,9 +31,13 @@ class Projectdetail extends Model
         'voucher_file',
         'youtube_video',
         'maturity_date',
+        'terms_link',
     ];
 
     protected $appends = ['image_url'];
+    protected $richTextAttributes = [
+        'description', // this enables rich text storage for `description`
+    ];
 
 
     public function project()
@@ -41,4 +48,5 @@ class Projectdetail extends Model
     {
         return url('uploads/projects/' . $this->image);
     }
+
 }

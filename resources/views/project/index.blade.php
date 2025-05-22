@@ -96,7 +96,8 @@
                                             @elseif($project->status == 5) bg-danger
                                                 @else bg-secondary
                                             @endif">
-                                        @if($project->status == 1) Running
+                                        @if($project->status == 1) Initiated
+                                            @elseif($project->status == 2) Running
                                         @elseif($project->status == 5) Closed
                                             @else Unknown
                                         @endif
@@ -120,9 +121,10 @@
                                     <i class="icofont-arrow-right"></i> People
                                 </a>
 
-                                <a href="{{ route('project.edit', ['id' => $project->id]) }}" class="btn btn-primary">
+                                <a href="{{ route('projects.edit', ['project' => $project->id]) }}" class="btn btn-primary">
                                     <i class="icofont-arrow-right"></i> Edit
                                 </a>
+
 
                                 <a href="{{ route('projectCosts', ['id' => $project->id]) }}" class="btn btn-primary"
                                     style="margin-top: 5px;">
@@ -185,7 +187,7 @@
 
                     </div>
                     <div class="modal-body">
-                        <form action="{{ route('storeProject') }}" method="POST" enctype="multipart/form-data">
+                        <form action="{{ route('projects.store') }}" method="POST" enctype="multipart/form-data">
                             @csrf
 
                             <div class="mb-3">
@@ -241,6 +243,13 @@
                             <div class="mb-3">
                                 <label class="form-label">Return Amount (%)</label>
                                 <input type="text" class="form-control" name="return_amount" required>
+                            </div>
+
+
+                            <div class="col-md-3">
+                                <label class="form-label">Terms and Condition</label>
+                                <input type="text" class="form-control" name="terms_url">
+
                             </div>
 
                             <div class="modal-footer">

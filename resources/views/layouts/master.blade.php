@@ -32,6 +32,8 @@
     </div>
 
     @include('layouts.js') <!-- Include your JS files here -->
+    @yield('scripts')
+
 </body>
 
 </html>

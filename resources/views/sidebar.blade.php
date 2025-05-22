@@ -40,11 +40,12 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="{{ route('projects') }}" class="nav-link">
+                    <a href="{{ route('projects.index') }}" class="nav-link">
                         <span class="pcoded-micon"><i class="feather icon-box"></i></span>
                         <span class="pcoded-mtext">Projects</span>
                     </a>
                 </li>
+
                 <li class="nav-item pcoded-hasmenu">
                     <a href="#!" class="nav-link">
                         <span class="pcoded-micon"><i class="feather icon-align-justify"></i></span>
@@ -67,12 +68,13 @@
 
                     </ul>
                 </li>
-                <!-- <li class="nav-item">
-                    <a href="{{ route('projects') }}" class="nav-link">
+                <li class="nav-item">
+                    <a href="{{ route('terms.index') }}" class="nav-link">
                         <span class="pcoded-micon"><i class="feather icon-box"></i></span>
-                        <span class="pcoded-mtext">Close</span>
+                        <span class="pcoded-mtext">Terms & Conditions</span>
                     </a>
-                </li> -->
+                </li>
+
 
 
             </ul>

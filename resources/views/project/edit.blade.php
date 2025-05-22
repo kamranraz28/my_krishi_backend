@@ -50,7 +50,7 @@
                     <h5 class="mb-0"><i class="fas fa-edit me-2"></i> Update Project Details</h5>
                 </div>
                 <div class="card-body px-4 py-4">
-                    <form action="{{ route('projects.update', $project->id) }}" method="POST" enctype="multipart/form-data">
+                    <form action="{{ route('projects.update', ['project' => $project->id]) }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
 

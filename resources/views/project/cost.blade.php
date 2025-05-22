@@ -32,26 +32,40 @@
     </section>
 
     <div class="d-flex justify-content-end mb-4">
-        @if($project->status == 5)
-            <button type="button" class="btn btn-secondary" disabled>
-                <i class="fas fa-lock"></i> Project Closed
-            </button>
-            <a href="{{ route('financeDetails', ['id' => $project->id]) }}" class="btn btn-primary" style="margin-left: 5px;">
-                <i class="fas fa-plus"></i> Financial Details
+        {{-- Start Project --}}
+        @if ($project->status == 1)
+            <a href="{{ route('startProject', ['id' => $project->id]) }}" class="btn btn-primary me-2" onclick="return confirm('Are you sure you want to start this project?')">
+                <i class="fas fa-play"></i> Start Project
             </a>
-
         @else
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createProjectModal">
-                <i class="fas fa-lock"></i> Close Project
+            <button type="button" class="btn btn-primary me-2" disabled>
+                <i class="fas fa-play"></i> Start Project
             </button>
-            <a href="{{ route('financeDetails', ['id' => $project->id]) }}" class="btn btn-primary"
-                style="margin-left: 5px; pointer-events: none; opacity: 0.5;" tabindex="-1" aria-disabled="true">
-                <i class="fas fa-plus"></i> Financial Details
-            </a>
         @endif
 
+        {{-- Close Project --}}
+        @if ($project->status == 2)
+            <button type="button" class="btn btn-secondary me-2" data-bs-toggle="modal" data-bs-target="#createProjectModal">
+                <i class="fas fa-lock"></i> Close Project
+            </button>
+        @else
+            <button type="button" class="btn btn-secondary me-2" disabled>
+                <i class="fas fa-lock"></i> Close Project
+            </button>
+        @endif
 
+        {{-- Financial Details --}}
+        @if ($project->status == 5)
+            <a href="{{ route('financeDetails', ['id' => $project->id]) }}" class="btn btn-success">
+                <i class="fas fa-file-invoice-dollar"></i> Financial Details
+            </a>
+        @else
+            <a class="btn btn-success" style="pointer-events: none; opacity: 0.5;" tabindex="-1" aria-disabled="true">
+                <i class="fas fa-file-invoice-dollar"></i> Financial Details
+            </a>
+        @endif
     </div>
+
 
 
 
@@ -193,14 +207,13 @@
 
                             <div class="mb-3">
                                 <label class="form-label">Remarks</label>
-                                <input type="text" class="form-control" name="remarks"
-                                    placeholder="Enter Remarks" required>
+                                <input type="text" class="form-control" name="remarks" placeholder="Enter Remarks" required>
                             </div>
 
                             <div class="mb-3">
                                 <label class="form-label">Upload File</label>
-                                <input type="file" class="form-control" name="voucher_file"
-                                    placeholder="Upload File" required>
+                                <input type="file" class="form-control" name="voucher_file" placeholder="Upload File"
+                                    required>
                             </div>
 
                             <div class="modal-footer">
@@ -225,20 +238,20 @@
                 fieldGroup.classList.add('row', 'mb-3', 'field-group');
 
                 fieldGroup.innerHTML = `
-                                    <div class="col-md-4">
-                                        <input type="text" name="reason[]" class="form-control" placeholder="Cost Field" required>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <input type="number" name="cost[]" class="form-control" placeholder="Cost Value" required>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <input type="number" name="voucher[]" class="form-control" placeholder="Voucher Number"
-                                            required>
-                                    </div>
-                                    <div class="col-md-2">
-                                        <button type="button" class="btn btn-danger remove-field">Remove</button>
-                                    </div>
-                                `;
+                                        <div class="col-md-4">
+                                            <input type="text" name="reason[]" class="form-control" placeholder="Cost Field" required>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <input type="number" name="cost[]" class="form-control" placeholder="Cost Value" required>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <input type="number" name="voucher[]" class="form-control" placeholder="Voucher Number"
+                                                required>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <button type="button" class="btn btn-danger remove-field">Remove</button>
+                                        </div>
+                                    `;
 
                 fieldContainer.appendChild(fieldGroup);
 

@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Web\ProjectController;
+use App\Http\Controllers\Web\TermsController;
 use App\Http\Controllers\WebController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Mail;
@@ -33,15 +35,19 @@ Route::get('/test', function () {
 
 
 Route::post('/user-login', [WebController::class, 'userLogin'])->name('userLogin');
+Route::get('/terms-and-conditions/show/{id?}', [TermsController::class, 'show'])->name('terms.show');
+
 
 Route::middleware(['auth', 'preventBackAfterLogout'])->group(function () {
     Route::get('/dashboard', [WebController::class, 'dashboard'])->name('dashboard');
     Route::get('/user-logout', [WebController::class, 'userLogout'])->name('userLogout');
-    Route::get('/projects', [WebController::class, 'projects'])->name('projects');
+
+    Route::prefix('projects')->name('projects.')->group(function () {
+        Route::resource('/', ProjectController::class)->parameters(['' => 'project']);
+    });
+
+
     Route::post('/project-filter', [WebController::class, 'projectFilter'])->name('projectFilter');
-    Route::get('/project-edit/{id?}', [WebController::class, 'projectEdit'])->name('project.edit');
-    Route::post('/project-store', [WebController::class, 'storeProject'])->name('storeProject');
-    Route::put('/project-update/{id}', [WebController::class, 'updateProject'])->name('projects.update');
     Route::get('/projects/updates/{id?}', [WebController::class, 'projectUpdates'])->name('projectUpdates');
     Route::get('/project-people/{id?}', [WebController::class, 'projectPeople'])->name('projectPeople');
     Route::get('/investor-history/{id?}', [WebController::class, 'investorHistory'])->name('investorHistory');
@@ -75,5 +81,10 @@ Route::middleware(['auth', 'preventBackAfterLogout'])->group(function () {
     Route::get('edit-faq/{id?}', [WebController::class, 'editFAQ'])->name('editFAQ');
     Route::delete('delete-faq/{id?}', [WebController::class, 'deleteFAQ'])->name('deleteFAQ');
     Route::put('/faq/update/{id}', [WebController::class, 'updateFAQ'])->name('updateFAQ');
+    Route::get('project/start/{id?}', [WebController::class, 'startProject'])->name('startProject');
+    Route::get('/terms-and-conditions', [TermsController::class, 'index'])->name('terms.index');
+    Route::get('/terms-and-conditions/create', [TermsController::class, 'create'])->name('terms.create');
+    Route::post('/terms-and-conditions/Store', [TermsController::class, 'store'])->name('terms.store');
+
 
 });

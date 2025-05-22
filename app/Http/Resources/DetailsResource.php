@@ -34,6 +34,7 @@ class DetailsResource extends JsonResource
             'closing_amount' => $this->closing_amount,
             'service_charge' => $this->service_charge,
             'maturity_date' => $this->maturity_date,
+            'terms_url' => $this->terms_url,
         ];
     }
 }
