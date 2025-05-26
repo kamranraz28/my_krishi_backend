@@ -69,7 +69,7 @@
                     </ul>
                 </li>
                 <li class="nav-item">
-                    <a href="{{ route('terms.index') }}" class="nav-link">
+                    <a href="{{ route('conditions.index') }}" class="nav-link">
                         <span class="pcoded-micon"><i class="feather icon-box"></i></span>
                         <span class="pcoded-mtext">Terms & Conditions</span>
                     </a>

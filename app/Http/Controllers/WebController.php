@@ -100,29 +100,6 @@ class WebController extends Controller
     }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     public function pendingPayment()
     {
         $bookings = Booking::with('investor','project.details')->where('status',2)->where('payment_method',2)->get();
@@ -224,18 +201,6 @@ class WebController extends Controller
 
         return redirect()->back()->with('success', 'Booking canceled successfully.');
     }
-
-
-
-
-
-
-    public function addFAQ($id)
-    {
-        $project = Project::with('details')->findOrFail($id);
-        return view('faq.index',compact('project'));
-    }
-
 
 
 

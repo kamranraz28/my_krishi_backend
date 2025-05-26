@@ -6,7 +6,7 @@
 <div class="container mt-4">
     <h1>Add New Template</h1>
 
-    <form method="POST" action="{{ route('terms.store') }}">
+    <form method="POST" action="{{ route('conditions.store') }}">
         {{-- CSRF Token --}}
         @csrf
 

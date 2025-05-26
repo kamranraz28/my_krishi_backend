@@ -3,13 +3,15 @@
 @section('title', 'Terms & Conditions')
 
 @section('content')
-    <div class="container mt-5">
-        <div class="text-center mb-5">
-            <h2 class="fw-bold">Terms & Conditions</h2>
+    <section class="page-header text-center py-5" style="background-color: #f8f9fa;">
+        <div class="container">
+            <h4 class="page-header__title display-4 font-weight-bold text-primary mb-3">Terms & Conditions</h4>
         </div>
+    </section>
+    <div class="container mt-5">
 
         <div class="d-flex justify-content-end mb-4">
-            <a href="{{ route('terms.create') }}" class="btn btn-primary me-2">
+            <a href="{{ route('conditions.create') }}" class="btn btn-primary me-2">
                 <i class="fas fa-plus"></i> Add Template
             </a>
         </div>
@@ -21,9 +23,8 @@
                         <h4 class="card-title text-primary">{{ $term->title }}</h4>
                         <div>
                             <input type="text" class="form-control d-inline-block me-2" id="url-{{ $term->id }}"
-                                   value="{{ route('terms.show', $term->id) }}" readonly style="max-width: 300px;">
-                            <button class="btn btn-outline-secondary btn-sm"
-                                    onclick="copyToClipboard('url-{{ $term->id }}')">
+                                value="{{ route('terms.show', $term->id) }}" readonly style="max-width: 300px;">
+                            <button class="btn btn-outline-secondary btn-sm" onclick="copyToClipboard('url-{{ $term->id }}')">
                                 Copy URL
                             </button>
                         </div>
@@ -56,17 +57,21 @@
             margin-bottom: 1rem;
             line-height: 1.7;
         }
+
         .content-body ul {
             padding-left: 1.5rem;
             margin-bottom: 1rem;
         }
+
         .content-body li {
             margin-bottom: 0.5rem;
         }
+
         .card-title {
             font-size: 1.25rem;
             font-weight: 600;
         }
+
         input[readonly] {
             background-color: #f8f9fa;
             cursor: default;

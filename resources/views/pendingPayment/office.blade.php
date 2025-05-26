@@ -62,7 +62,7 @@
                                         class="badge bg-primary mt-1 d-inline-block">{{ $booking->project->unique_id ?? ''}}</span>
                                 </td>
                                 <td>
-                                    <a href="{{ route('investorHistory', $booking->investor_id) }}"
+                                    <a href="{{ route('investors.history', $booking->investor_id) }}"
                                         class="btn btn-info btn-sm d-block">
                                         {{ $booking->investor->name ?? '' }}
                                     </a>

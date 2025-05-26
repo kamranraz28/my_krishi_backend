@@ -93,6 +93,11 @@ Route::middleware(['auth', 'preventBackAfterLogout'])->group(function () {
 
     });
 
+    Route::prefix('terms-and-conditions')->name('conditions.')->group(function () {
+        Route::resource('/', TermsController::class)->parameters(['' => 'term']);
+    });
+
+
     Route::get('office-payment/pending', [WebController::class, 'pendingPayment'])->name('officePendingPayment');
     Route::get('bank-payment/pending', [WebController::class, 'bankPendingPayment'])->name('bankPendingPayment');
     Route::get('office-payment/confirm/{id?}', [WebController::class, 'confirmOfficePayment'])->name('confirmOfficePayment');
@@ -100,9 +105,6 @@ Route::middleware(['auth', 'preventBackAfterLogout'])->group(function () {
     Route::get('bank-payment/confirm/{id?}', [WebController::class, 'confirmBankPayment'])->name('confirmBankPayment');
     Route::get('bank-payment/cancel/{id?}', [WebController::class, 'cancelBankPayment'])->name('cancelBankPayment');
     Route::get('bank-receipt/view/{id?}', [WebController::class, 'viewBankReceopt'])->name('viewBankReceopt');
-    Route::get('/terms-and-conditions', [TermsController::class, 'index'])->name('terms.index');
-    Route::get('/terms-and-conditions/create', [TermsController::class, 'create'])->name('terms.create');
-    Route::post('/terms-and-conditions/Store', [TermsController::class, 'store'])->name('terms.store');
 
 
 });
