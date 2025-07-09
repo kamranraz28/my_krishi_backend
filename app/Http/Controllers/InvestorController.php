@@ -8,6 +8,7 @@ use App\Http\Resources\BankResource;
 use App\Http\Resources\BookingResource;
 use App\Http\Resources\CartResource;
 use App\Http\Resources\CommentResource;
+use App\Http\Resources\InvestorDetailsResource;
 use App\Http\Resources\NotificationResource;
 use App\Http\Resources\ProjectResource;
 use App\Http\Resources\ProjectUpdateResource;
@@ -31,6 +32,27 @@ use Illuminate\Http\Request;
 
 class InvestorController extends Controller
 {
+
+    public function details()
+    {
+        $user = Auth::user();
+
+        // Ensure the user has the required access level
+        if ($user->level !== 200) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'You are not eligible to do this.'
+            ], 401);
+        }
+
+        $investorDetails = Investor::with('user', 'bank')->where('investor_id', $user->id)->first();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Investor details retrieved successfully.',
+            'investorDetails' => new InvestorDetailsResource($investorDetails),
+        ], 200);
+    }
     // Fetch the list of all projects for the authenticated investor
     public function projectList()
     {

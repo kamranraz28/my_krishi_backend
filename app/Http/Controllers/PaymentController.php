@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\OnlinePayment;
 use App\Models\Booking;
 use App\Models\Cart;
 use App\Models\Projectdetail;
@@ -70,7 +71,7 @@ class PaymentController extends Controller
 
             // Clean up cart (optional)
             if ($bookings->isNotEmpty()) {
-
+                event(new OnlinePayment($bookings));
             }
 
             return response()->json([

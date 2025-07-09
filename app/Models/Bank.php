@@ -17,4 +17,9 @@ class Bank extends Model
         'type',
         'headquarters',
     ];
+
+    public function investors()
+    {
+        return $this->hasMany(Investor::class, 'bank_id', 'id');
+    }
 }

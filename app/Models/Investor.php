@@ -32,4 +32,14 @@ class Investor extends Model
         return $this->hasMany(Booking::class, 'investor_id', 'investor_id');
     }
 
+    public function bank()
+    {
+        return $this->belongsTo(Bank::class, 'bank_id', 'id');
+    }
+
+    public function getImageUrlAttribute()
+    {
+        return url('uploads/investors/nid/' . $this->nid_upload);
+    }
+
 }

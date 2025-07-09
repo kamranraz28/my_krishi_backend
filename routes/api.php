@@ -40,6 +40,7 @@ Route::middleware('auth:api')->group(function () {
     });
 
     Route::group(['prefix' => 'investor'], function () {
+        Route::get('/details', [InvestorController::class, 'details']);
         Route::get('/projects', [InvestorController::class, 'projectList']);
         Route::get('/projects/details/{id?}', [InvestorController::class, 'projectDetails']);
         Route::get('/projects/booking/{id?}', [InvestorController::class, 'projectBooking']);

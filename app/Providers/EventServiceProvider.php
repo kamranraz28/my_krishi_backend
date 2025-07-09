@@ -42,6 +42,9 @@ class EventServiceProvider extends ServiceProvider
         \App\Events\BankPaymentCancel::class => [
             \App\Listeners\SendBankPaymentCancelMail::class,
         ],
+        \App\Events\OnlinePayment::class => [
+            \App\Listeners\SendOnlinePaymentMail::class,
+        ],
     ];
 
     /**
