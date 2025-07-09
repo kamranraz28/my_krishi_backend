@@ -108,4 +108,9 @@ class User extends Authenticatable implements JWTSubject
                     ->withTimestamps();
     }
 
+    public function bankDetails()
+    {
+        return $this->hasOne(Bankdetail::class, 'investor_id');
+    }
+
 }

@@ -23,6 +23,7 @@ class UserResource extends JsonResource
             'address' => $this->address,
             'level' => $this->level,
             'image_url' => $this->image_url,
+            'bankdetails' => new BankdetailResource($this->bankDetails),
         ];
     }
 }

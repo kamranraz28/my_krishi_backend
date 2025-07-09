@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Events\BankPayment;
 use App\Events\OfficePayment;
+use App\Http\Resources\BankdetailResource;
 use App\Http\Resources\BankResource;
 use App\Http\Resources\BookingResource;
 use App\Http\Resources\CartResource;
@@ -15,6 +16,7 @@ use App\Http\Resources\ProjectUpdateResource;
 use App\Http\Resources\ReplyResource;
 use App\Http\Resources\UserResource;
 use App\Models\Bank;
+use App\Models\Bankdetail;
 use App\Models\Booking;
 use App\Models\Cart;
 use App\Models\Comment;
@@ -29,6 +31,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class InvestorController extends Controller
 {
@@ -45,7 +48,7 @@ class InvestorController extends Controller
             ], 401);
         }
 
-        $investorDetails = Investor::with('user', 'bank')->where('investor_id', $user->id)->first();
+        $investorDetails = Investor::with('user')->where('investor_id', $user->id)->first();
 
         return response()->json([
             'status' => 'success',
@@ -67,7 +70,7 @@ class InvestorController extends Controller
         }
 
         // Fetch all projects with their details
-        $projects = Project::with('details')->get();
+        $projects = Project::with('details')->whereNot('status',5)->get();
 
         // Return the list of projects as a JSON response
         return response()->json([
@@ -707,15 +710,16 @@ class InvestorController extends Controller
     }
 
     // Update the profile of a specific user
-    public function profileUpdate(Request $request, $id)
+    public function profileUpdate(Request $request)
     {
-        $user = User::find($id);
+        $user = Auth::user();
 
-        if (!$user) {
+        // Ensure the user has the required access level
+        if ($user->level !== 200) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'User not found.'
-            ], 404);
+                'message' => 'You are not eligible to do this.'
+            ], 401);
         }
 
         // Upload profile image
@@ -742,27 +746,12 @@ class InvestorController extends Controller
             $nidFile->move(public_path('uploads/investors/nid'), $nidFileName);
         }
 
-        // Upload Check
-        $checkFileName = null;
-        if ($request->hasFile('check_upload')) {
-            $checkFile = $request->file('check_upload');
-            $checkFileName = time() . '_' . $checkFile->getClientOriginalName();
-            $checkFile->move(public_path('uploads/investors/blank_check'), $checkFileName);
-        }
-
         // Update or Create Investor
         Investor::updateOrCreate(
             ['investor_id' => $user->id], // condition
             [
                 'nid' => $request->nid,
                 'nid_upload' => $nidFileName,
-                'bank_id' => $request->bank_id,
-                'acc_name' => $request->acc_name,
-                'acc_number' => $request->acc_number,
-                'branch_name' => $request->branch_name,
-                'routing_number' => $request->routing_number,
-                'swift_code' => $request->swift_code,
-                'check_upload' => $checkFileName,
             ]
         );
 
@@ -770,6 +759,48 @@ class InvestorController extends Controller
             'status' => 'success',
             'message' => 'Profile updated successfully.',
             'user' => new UserResource($user)
+        ], 200);
+    }
+
+    public function bankDetails(Request $request)
+    {
+        $user = Auth::user();
+
+        // Ensure the user has the required access level
+        if ($user->level !== 200) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'You are not eligible to do this.'
+            ], 401);
+        }
+
+        $nidFileName = null;
+        if ($request->hasFile('cheque_upload')) {
+            $nidFile = $request->file('cheque_upload');
+            $extension = $nidFile->getClientOriginalExtension();
+            $nidFileName = Str::random(12) . '.' . $extension;
+            $nidFile->move(public_path('uploads/investors/blank_check'), $nidFileName);
+        }
+
+        // Update or Create Investor
+        $bankdetails = Bankdetail::updateOrCreate(
+            ['investor_id' => $user->id], // condition
+            [
+                'bank_id' => $request->bank_id,
+                'acc_name' => $request->acc_name,
+                'acc_number' => $request->acc_number,
+                'branch_name' => $request->branch_name,
+                'routing_number' => $request->routing_number,
+                'swift_code' => $request->swift_code,
+                'cheque_upload' => $nidFileName
+            ]
+        );
+
+
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Bank details updated successfully.',
         ], 200);
     }
 

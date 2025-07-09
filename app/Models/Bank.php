@@ -18,8 +18,8 @@ class Bank extends Model
         'headquarters',
     ];
 
-    public function investors()
+    public function bankDetails()
     {
-        return $this->hasMany(Investor::class, 'bank_id', 'id');
+        return $this->hasMany(Bankdetail::class, 'bank_id', 'id');
     }
 }

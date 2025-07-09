@@ -13,13 +13,6 @@ class Investor extends Model
         'investor_id',
         'nid',
         'nid_upload',
-        'bank_id',
-        'acc_name',
-        'acc_number',
-        'branch_name',
-        'routing_number',
-        'swift_code',
-        'check_upload',
     ];
 
     public function user()
@@ -30,11 +23,6 @@ class Investor extends Model
     public function bookings()
     {
         return $this->hasMany(Booking::class, 'investor_id', 'investor_id');
-    }
-
-    public function bank()
-    {
-        return $this->belongsTo(Bank::class, 'bank_id', 'id');
     }
 
     public function getImageUrlAttribute()
