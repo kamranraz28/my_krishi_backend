@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Events\BankPayment;
 use App\Events\OfficePayment;
-use App\Http\Resources\BankdetailResource;
 use App\Http\Resources\BankResource;
 use App\Http\Resources\BookingResource;
 use App\Http\Resources\CartResource;
@@ -15,9 +14,10 @@ use App\Http\Resources\ProjectResource;
 use App\Http\Resources\ProjectUpdateResource;
 use App\Http\Resources\ReplyResource;
 use App\Http\Resources\UserResource;
+use App\Http\Resources\BankdetailResource;
 use App\Models\Bank;
-use App\Models\Bankdetail;
 use App\Models\Booking;
+use App\Models\Bankdetail;
 use App\Models\Cart;
 use App\Models\Comment;
 use App\Models\Investor;
@@ -29,9 +29,9 @@ use App\Models\User;
 use Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 
 class InvestorController extends Controller
 {
@@ -55,8 +55,6 @@ class InvestorController extends Controller
     // Fetch the list of all projects for the authenticated investor
     public function projectList()
     {
-        $user = Auth::user();
-
         // Fetch all projects with their details
         $projects = Project::with('details')->whereNot('status',5)->get();
 
@@ -71,6 +69,7 @@ class InvestorController extends Controller
     // Fetch the details of a specific project
     public function projectDetails($id)
     {
+        // Fetch the project with its details
         $details = Project::with('details', 'faq')->find($id);
 
         // Check if the project exists
@@ -148,6 +147,14 @@ class InvestorController extends Controller
     // public function cartConfirm(Request $request)
     // {
     //     $user = Auth::user();
+
+    //     // Ensure the user has the required access level
+    //     if ($user->level !== 200) {
+    //         return response()->json([
+    //             'status' => 'error',
+    //             'message' => 'You are not eligible to do this.'
+    //         ], 401);
+    //     }
 
     //     $projects = $request->project_id; // Array of project IDs
     //     $units = $request->unit; // Array of units for each project
@@ -463,7 +470,6 @@ class InvestorController extends Controller
 
     public function cartUpdate(Request $request, $id)
     {
-
         $cart = Cart::find($id);
 
         if (!$cart) {
@@ -514,7 +520,10 @@ class InvestorController extends Controller
         $user = Auth::user();
 
         // Fetch all bookings with project details
-        $bookings = Booking::with('project.details')->where('investor_id', $user->id)->get();
+        $bookings = Booking::with(['project.details', 'project.cost'])
+    ->where('investor_id', $user->id)
+    ->get();
+
 
         // Return the bookings as a JSON response
         return response()->json([
@@ -676,8 +685,6 @@ class InvestorController extends Controller
                 'cheque_upload' => $nidFileName
             ]
         );
-
-
 
         return response()->json([
             'status' => 'success',
