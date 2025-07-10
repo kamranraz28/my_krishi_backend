@@ -59,4 +59,13 @@ class Project extends Model
         return $this->hasMany(Faq::class, 'project_id');
     }
 
+    public function scopeWithStatus($query, $status)
+    {
+        if ($status) {
+            return $query->where('status', $status);
+        }
+
+        return $query;
+    }
+
 }

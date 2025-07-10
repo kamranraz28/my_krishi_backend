@@ -24,35 +24,19 @@ use Mpdf\Mpdf;
 class ProjectController extends Controller
 {
     //
-    public function index ()
+    public function index(Request $request)
     {
-        //$this->projectRepository->debugProjectCache();
-        $status = Session::get('status');
+        $status = session('status');
 
-        $projectQuery = Project::with('details');
-
-        if ($status) {
-            $projectQuery->where('status', $status);
-        }
-        $projects = $projectQuery->orderBy('id', 'desc')->get();
-
-        // Paginate the sorted data
-        $currentPage = LengthAwarePaginator::resolveCurrentPage();
-        $perPage = 9;
-        $currentItems = $projects->slice(($currentPage - 1) * $perPage, $perPage)->all();
-
-        // Create LengthAwarePaginator instance
-        $projects = new LengthAwarePaginator(
-            $currentItems,
-            $projects->count(),
-            $perPage,
-            $currentPage,
-            ['path' => Paginator::resolveCurrentPath()]
-        );
+        $projects = Project::with('details')
+            ->withStatus($status)
+            ->orderBy('id', 'desc')
+            ->paginate(9)
+            ->withQueryString(); // keeps query in pagination links
 
         $terms = Term::all();
 
-        return view('project.index', compact('projects','terms'));
+        return view('project.index', compact('projects', 'terms'));
     }
 
     public function filter(Request $request)

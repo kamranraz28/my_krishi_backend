@@ -8,6 +8,8 @@
     <meta name="description" content="" />
     <meta name="keywords" content="">
     <meta name="author" content="Phoenixcoded" />
+    <link rel="icon" href="{{ asset('fav.png') }}" type="image/x-icon" />
+
 
     <title>My Krishi</title>
 
