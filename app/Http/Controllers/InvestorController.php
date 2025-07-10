@@ -35,18 +35,14 @@ use Illuminate\Support\Str;
 
 class InvestorController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('InvestorLevel');
+    }
 
     public function details()
     {
         $user = Auth::user();
-
-        // Ensure the user has the required access level
-        if ($user->level !== 200) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'You are not eligible to do this.'
-            ], 401);
-        }
 
         $investorDetails = Investor::with('user')->where('investor_id', $user->id)->first();
 
@@ -60,14 +56,6 @@ class InvestorController extends Controller
     public function projectList()
     {
         $user = Auth::user();
-
-        // Ensure the user has the required access level
-        if ($user->level !== 200) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'You are not eligible to do this.'
-            ], 401);
-        }
 
         // Fetch all projects with their details
         $projects = Project::with('details')->whereNot('status',5)->get();
@@ -83,16 +71,6 @@ class InvestorController extends Controller
     // Fetch the details of a specific project
     public function projectDetails($id)
     {
-        $user = Auth::user();
-        // Ensure the user has the required access level
-        if ($user->level !== 200) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'You are not eligible to do this.'
-            ], 401);
-        }
-
-        // Fetch the project with its details
         $details = Project::with('details', 'faq')->find($id);
 
         // Check if the project exists
@@ -115,14 +93,6 @@ class InvestorController extends Controller
     public function addToCart(Request $request, $id)
     {
         $user = Auth::user();
-
-        // Ensure the user has the required access level
-        if ($user->level !== 200) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'You are not eligible to do this.'
-            ], 401);
-        }
 
         try {
             // Add the project to the cart
@@ -163,14 +133,6 @@ class InvestorController extends Controller
     {
         $user = Auth::user();
 
-        // Ensure the user has the required access level
-        if ($user->level !== 200) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'You are not eligible to do this.'
-            ], 401);
-        }
-
         // Fetch all cart items with project details
         $carts = Cart::with('project.details')->where('investor_id', $user->id)->get();
 
@@ -186,14 +148,6 @@ class InvestorController extends Controller
     // public function cartConfirm(Request $request)
     // {
     //     $user = Auth::user();
-
-    //     // Ensure the user has the required access level
-    //     if ($user->level !== 200) {
-    //         return response()->json([
-    //             'status' => 'error',
-    //             'message' => 'You are not eligible to do this.'
-    //         ], 401);
-    //     }
 
     //     $projects = $request->project_id; // Array of project IDs
     //     $units = $request->unit; // Array of units for each project
@@ -281,13 +235,6 @@ class InvestorController extends Controller
     public function onlinePayment(Request $request)
     {
         $user = Auth::user();
-
-        if ($user->level !== 200) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'You are not eligible to do this.'
-            ], 401);
-        }
 
         // Step 1: Get Token
         $authResponse = Http::post('https://sandbox.shurjopayment.com/api/get_token', [
@@ -389,14 +336,6 @@ class InvestorController extends Controller
     {
         $user = Auth::user();
 
-        // Check if the user is eligible
-        if ($user->level !== 200) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'You are not eligible to do this.'
-            ], 401);
-        }
-
         $projects = $request->project_id; // Array of project IDs
         $units = $request->unit;          // Array of units for each project
 
@@ -447,13 +386,6 @@ class InvestorController extends Controller
     public function bankPayment(Request $request)
     {
         $user = Auth::user();
-
-        if ($user->level !== 200) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'You are not eligible to do this.'
-            ], 401);
-        }
 
         $projects = $request->project_id; // Array of project IDs
         $units = $request->unit; // Array of units for each project
@@ -513,15 +445,6 @@ class InvestorController extends Controller
 
     public function cartEdit($id)
     {
-        $user = Auth::user();
-
-        if ($user->level !== 200) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'You are not eligible to do this.'
-            ], 401);
-        }
-
         $cart = Cart::with('project.details')->find($id);
 
         if (!$cart) {
@@ -540,14 +463,6 @@ class InvestorController extends Controller
 
     public function cartUpdate(Request $request, $id)
     {
-        $user = Auth::user();
-
-        if ($user->level !== 200) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'You are not eligible to do this.'
-            ], 401);
-        }
 
         $cart = Cart::find($id);
 
@@ -573,16 +488,6 @@ class InvestorController extends Controller
     // Remove specific items from the cart
     public function removeFromCart(Request $request)
     {
-        $user = Auth::user();
-
-        // Ensure the user has the required access level
-        if ($user->level !== 200) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'You are not eligible to do this.'
-            ], 401);
-        }
-
         $ids = $request->cart_id; // Array of cart item IDs to remove
 
         // Validate the input
@@ -607,14 +512,6 @@ class InvestorController extends Controller
     public function myBookings()
     {
         $user = Auth::user();
-
-        // Ensure the user has the required access level
-        if ($user->level !== 200) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'You are not eligible to do this.'
-            ], 401);
-        }
 
         // Fetch all bookings with project details
         $bookings = Booking::with('project.details')->where('investor_id', $user->id)->get();
@@ -714,14 +611,6 @@ class InvestorController extends Controller
     {
         $user = Auth::user();
 
-        // Ensure the user has the required access level
-        if ($user->level !== 200) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'You are not eligible to do this.'
-            ], 401);
-        }
-
         // Upload profile image
         $imageFileName = $user->image; // keep old if no new
         if ($request->hasFile('image')) {
@@ -765,14 +654,6 @@ class InvestorController extends Controller
     public function bankDetails(Request $request)
     {
         $user = Auth::user();
-
-        // Ensure the user has the required access level
-        if ($user->level !== 200) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'You are not eligible to do this.'
-            ], 401);
-        }
 
         $nidFileName = null;
         if ($request->hasFile('cheque_upload')) {
@@ -833,14 +714,6 @@ class InvestorController extends Controller
     {
         $user = Auth::user();
 
-        // Ensure the user has the required access level
-        if ($user->level !== 200) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'You are not eligible to do this.'
-            ], 401);
-        }
-
         $bookings = Booking::with('project')
             ->where('investor_id', $user->id)
             ->get();
@@ -858,13 +731,6 @@ class InvestorController extends Controller
     public function maturedFinance()
     {
         $user = Auth::user();
-
-        if ($user->level !== 200) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'You are not eligible to do this.'
-            ], 401);
-        }
 
         $bookings = Booking::with('project.details')
         ->where('investor_id', $user->id)
@@ -886,15 +752,6 @@ class InvestorController extends Controller
 
     public function maturedFinanceDetails($id)
     {
-        $user = Auth::user();
-
-        if ($user->level !== 200) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'You are not eligible to do this.'
-            ], 401);
-        }
-
         // Load bookings with project + project.details
         $bookings = Booking::with('project.details')->findOrFail($id);
 

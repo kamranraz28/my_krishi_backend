@@ -69,6 +69,7 @@ class Kernel extends HttpKernel
         // Other middlewares...
         'preventBackAfterLogout' => \App\Http\Middleware\PreventBackAfterLogout::class,
         'jwt.auth' => \App\Http\Middleware\JwtMiddleware::class,
+        'InvestorLevel' => \App\Http\Middleware\InvestorLevel::class,
     ];
 
 }
